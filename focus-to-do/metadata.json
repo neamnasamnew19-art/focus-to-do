@@ -1,0 +1,6 @@
+{
+  "name": "Focus To-Do",
+  "description": "Minimalist Notion-style student focus companion with Pomodoro timer, task management, expense tracking, GPA calculator, and calendar.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

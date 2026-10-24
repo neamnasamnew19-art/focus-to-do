@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2383e2"/>
+      <stop offset="100%" stop-color="#1a70c4"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+  <!-- Background squircle -->
+  <rect x="32" y="32" width="448" height="448" rx="112" fill="url(#grad)" filter="url(#shadow)"/>
+  
+  <!-- Outer Timer Ring -->
+  <circle cx="256" cy="256" r="140" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="20"/>
+  <circle cx="256" cy="256" r="140" fill="none" stroke="#ffffff" stroke-width="20" stroke-linecap="round" stroke-dasharray="879.6" stroke-dashoffset="260"/>
+  
+  <!-- Inner Center Check & Spark -->
+  <path d="M195 260 L235 300 L320 205" fill="none" stroke="#ffffff" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Subtle Top Stopwatch Top Button -->
+  <rect x="236" y="80" width="40" height="20" rx="8" fill="#ffffff" opacity="0.9"/>
+</svg>

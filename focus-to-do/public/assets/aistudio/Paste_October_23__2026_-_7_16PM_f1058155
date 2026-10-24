@@ -1,0 +1,2280 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Focus To-Do</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root{
+  --bg:#fff; --surface:#fff; --surface-2:#f7f7f5; --surface-3:#f1f1ef;
+  --hover:rgba(55,53,47,.055); --border:rgba(55,53,47,.09); --border-strong:rgba(55,53,47,.16);
+  --text:#37352f; --text-2:#787774; --text-3:#9b9b9b;
+  --primary:#2383e2; --primary-hover:#1a70c4; --primary-ink:#fff; --primary-soft:rgba(35,131,226,.1);
+  --danger:#eb5757; --danger-soft:rgba(235,87,87,.1);
+  --shadow:rgba(15,15,15,.05) 0 0 0 1px, rgba(15,15,15,.1) 0 3px 6px, rgba(15,15,15,.2) 0 9px 24px;
+  --font:'Plus Jakarta Sans',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+html.dark{
+  --bg:#191919; --surface:#202020; --surface-2:#252525; --surface-3:#2c2c2c;
+  --hover:rgba(255,255,255,.055); --border:rgba(255,255,255,.094); --border-strong:rgba(255,255,255,.155);
+  --text:rgba(255,255,255,.81); --text-2:rgba(255,255,255,.46); --text-3:rgba(255,255,255,.34);
+  --primary:#529cca; --primary-hover:#6aadd6; --primary-soft:rgba(82,156,202,.14);
+  --danger:#ff7369; --danger-soft:rgba(255,115,105,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  height:100vh;background:var(--bg);color:var(--text);font-family:var(--font);
+  font-size:14px;line-height:1.5;letter-spacing:-.005em;-webkit-font-smoothing:antialiased;
+  overflow:hidden;display:flex;flex-direction:column;
+}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:5px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-track{background:transparent}
+button{font-family:inherit;border:none;background:none;cursor:pointer;color:inherit}
+input,select,textarea{font-family:inherit}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:6px}
+.soft{background:var(--surface-2);border:1px solid var(--border);border-radius:6px}
+.dim{color:var(--text-2)}
+.row{display:flex;justify-content:space-between;align-items:center}
+.inp{width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;transition:.15s}
+.inp:focus{background:var(--surface);border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-soft)}
+.inp::placeholder{color:var(--text-3)}
+select.inp{appearance:none;cursor:pointer;padding-right:28px;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23787774' stroke-width='3'><path d='M6 9l6 6 6-6'/></svg>");
+  background-repeat:no-repeat;background-position:right 10px center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;font-weight:600;font-size:13px;
+  border-radius:4px;padding:6px 12px;transition:.15s;cursor:pointer;white-space:nowrap}
+.btn:active{transform:translateY(.5px)}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-hover)}
+.btn-ghost{color:var(--text-2)}
+.btn-ghost:hover{background:var(--hover);color:var(--text)}
+.btn-soft{background:var(--surface-2);color:var(--text);border:1px solid var(--border)}
+.btn-soft:hover{background:var(--surface-3)}
+.btn-danger{background:var(--danger);color:#fff}
+.side-item{display:flex;align-items:center;gap:9px;padding:5px 9px;border-radius:4px;font-size:13.5px;
+  font-weight:500;color:var(--text-2);width:100%;text-align:left;transition:.15s}
+.side-item:hover{background:var(--hover);color:var(--text)}
+.side-item.active{background:var(--primary-soft);color:var(--primary);font-weight:600}
+.side-item i{width:16px;text-align:center;font-size:14px}
+.side-label{padding:14px 9px 4px;font-size:10.5px;font-weight:700;color:var(--text-3);
+  letter-spacing:.08em;text-transform:uppercase}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:1px 7px;border-radius:3px;font-size:11.5px;font-weight:600}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:3px;font-size:12px;
+  font-weight:600;background:var(--primary-soft);color:var(--primary)}
+.chk{width:16px;height:16px;border-radius:3px;border:1.5px solid var(--border-strong);display:flex;
+  align-items:center;justify-content:center;flex-shrink:0;transition:.12s;background:transparent;margin-top:3px}
+.chk:hover{border-color:var(--primary);background:var(--primary-soft)}
+.chk.on{background:var(--primary);border-color:var(--primary);color:#fff}
+.chk i{font-size:9px}
+.tomato{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--primary);display:inline-block}
+.tomato.on{background:var(--primary)}
+.toast{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:9px 14px;
+  border-radius:6px;font-size:13px;font-weight:600;box-shadow:var(--shadow);opacity:0;transform:translateY(6px);
+  transition:.2s;pointer-events:none;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateY(0)}
+.fade{animation:fade .18s ease}
+@keyframes fade{from{opacity:0;transform:translateY(2px)}to{opacity:1;transform:none}}
+.tabular{font-variant-numeric:tabular-nums}
+#timer-display{font-family:var(--mono);font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.045em}
+.cat-btn{display:flex;flex-direction:column;align-items:center;gap:5px;padding:9px 4px;border-radius:4px;
+  border:1px solid var(--border);font-size:11px;font-weight:600;color:var(--text-2);transition:.15s;width:100%}
+.cat-btn:hover{background:var(--hover)}
+.cat-btn.on{border-color:var(--c);color:var(--c);background:var(--c-soft)}
+.emoji-cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:20px;
+  border-radius:4px;transition:.1s}
+.emoji-cell:hover{background:var(--hover);transform:scale(1.15)}
+.emoji-tab{padding:4px 9px;border-radius:4px;font-size:18px;line-height:1}
+.emoji-tab:hover{background:var(--hover)}
+.emoji-tab.on{background:var(--primary-soft)}
+.cover-cell{aspect-ratio:16/6;border-radius:4px;cursor:pointer;border:1.5px solid transparent;transition:.12s;background-size:cover;background-position:center}
+.cover-cell:hover{transform:scale(1.03)}
+.cover-cell.on{border-color:var(--primary)}
+.modal-bg{background:rgba(15,15,15,.35);backdrop-filter:blur(3px)}
+.hidden{display:none!important}
+@media(min-width:768px){
+  #scrim{display:none!important}
+  #sidebar{transition:none}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header style="height:44px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;
+  padding:0 12px;background:var(--bg);border-bottom:1px solid var(--border);z-index:30">
+  <div style="display:flex;align-items:center;gap:8px">
+    <button id="btn-menu" class="btn-ghost" style="width:28px;height:28px;border-radius:4px;padding:0">
+      <i class="fa-solid fa-bars" style="font-size:13px"></i>
+    </button>
+    <div style="width:24px;height:24px;border-radius:4px;background:var(--primary);color:#fff;
+      display:flex;align-items:center;justify-content:center">
+      <i class="fa-solid fa-check" style="font-size:10px"></i>
+    </div>
+    <span style="font-size:14.5px;font-weight:700;letter-spacing:-.02em">Focus To-Do</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:6px">
+    <div class="pill" id="energy-pill" title="Focus energy">
+      <span>⚡</span><span id="energy-val" class="tabular">0</span>
+    </div>
+    <button id="btn-theme" style="width:28px;height:28px;border-radius:4px;color:var(--text-2)">
+      <i class="fa-solid fa-moon" style="font-size:12px"></i>
+    </button>
+  </div>
+</header>
+
+<!-- BODY -->
+<div style="flex:1;display:flex;overflow:hidden;position:relative">
+  <div id="scrim" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:30"></div>
+
+  <aside id="sidebar" style="width:232px;flex-shrink:0;padding:8px;background:var(--surface-2);
+    border-right:1px solid var(--border);z-index:40;position:absolute;height:100%;left:0;top:0;
+    transform:translateX(-100%);transition:transform .2s;overflow-y:auto;
+    display:flex;flex-direction:column;justify-content:space-between">
+    <div>
+      <button class="side-item" style="font-weight:700;color:var(--text);gap:6px">
+        <span style="width:20px;height:20px;border-radius:4px;background:var(--primary);color:#fff;
+          display:flex;align-items:center;justify-content:center;font-size:10px">
+          <i class="fa-solid fa-check"></i>
+        </span>
+        <span>Focus To-Do</span>
+      </button>
+      <div class="side-label">Tasks &amp; Focus</div>
+      <button data-tab="today" class="nav side-item active"><i class="fa-solid fa-list-check"></i><span>Today</span></button>
+      <button data-tab="upcoming" class="nav side-item"><i class="fa-regular fa-calendar-days"></i><span>Upcoming</span></button>
+      <button data-tab="pomo" class="nav side-item"><i class="fa-solid fa-stopwatch"></i><span>Pomodoro</span></button>
+      <div class="side-label">Student Hub</div>
+      <button data-tab="analytics" class="nav side-item"><i class="fa-solid fa-chart-simple"></i><span>Reports</span></button>
+      <button data-tab="expenses" class="nav side-item"><i class="fa-solid fa-wallet"></i><span>Expenses</span></button>
+      <button data-tab="gpa" class="nav side-item"><i class="fa-solid fa-graduation-cap"></i><span>GPA Tracker</span></button>
+      <button data-tab="events" class="nav side-item"><i class="fa-regular fa-calendar"></i><span>Calendar</span></button>
+    </div>
+    <div>
+      <button data-tab="settings" class="nav side-item"><i class="fa-solid fa-gear"></i><span>Settings</span></button>
+    </div>
+  </aside>
+
+  <main id="main" style="flex:1;overflow-y:auto;background:var(--bg)">
+
+    <!-- PAGE HEADER -->
+    <div id="page-header">
+      <div id="page-cover" class="hidden" style="position:relative;height:180px;overflow:hidden">
+        <div id="cover-bg" style="position:absolute;inset:0;background-size:cover;background-position:center"></div>
+        <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.18),transparent 60%)"></div>
+        <div style="position:absolute;right:12px;top:12px;display:flex;gap:6px;opacity:0;transition:.15s" id="cover-controls">
+          <button id="cover-change" style="font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:4px;
+            background:rgba(0,0,0,.55);color:#fff;backdrop-filter:blur(8px)">
+            <i class="fa-solid fa-image" style="font-size:10px;margin-right:4px"></i>Change cover
+          </button>
+          <button id="cover-remove" style="width:26px;height:26px;border-radius:4px;background:rgba(0,0,0,.55);
+            color:#fff;backdrop-filter:blur(8px)">
+            <i class="fa-solid fa-xmark" style="font-size:11px"></i>
+          </button>
+        </div>
+      </div>
+      <div style="max-width:768px;margin:0 auto;padding:0 16px">
+        <div id="icon-row" style="display:flex;align-items:center;gap:6px;transition:margin .2s">
+          <button id="page-icon" style="font-size:62px;line-height:1;padding:8px;margin-left:-8px;
+            border-radius:6px;transition:.15s">⏱️</button>
+          <button id="icon-change" class="icon-hint" style="font-size:11.5px;font-weight:600;padding:5px 9px;
+            border-radius:4px;color:var(--text-3);opacity:0;transition:.15s">
+            <i class="fa-regular fa-face-smile" style="font-size:10px;margin-right:4px"></i>Change icon
+          </button>
+          <button id="cover-add" class="icon-hint hidden" style="font-size:11.5px;font-weight:600;padding:5px 9px;
+            border-radius:4px;color:var(--text-3);opacity:0;transition:.15s">
+            <i class="fa-solid fa-image" style="font-size:10px;margin-right:4px"></i>Add cover
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div style="max-width:768px;margin:0 auto;padding:20px 16px 100px">
+
+      <div id="focus-banner" class="hidden card" style="padding:12px;align-items:center;
+        justify-content:space-between;gap:12px;margin-bottom:20px;border-color:var(--primary);background:var(--primary-soft)">
+        <div style="display:flex;align-items:center;gap:12px;min-width:0">
+          <div style="width:32px;height:32px;border-radius:6px;background:var(--primary);color:#fff;
+            display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">🎯</div>
+          <div style="min-width:0">
+            <div style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--primary)">Now focusing</div>
+            <div id="focus-title" style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</div>
+          </div>
+        </div>
+        <button data-tab="pomo" class="nav btn btn-primary" style="flex-shrink:0">Open timer</button>
+      </div>
+
+      <!-- TODAY -->
+      <section id="tab-today" class="tab">
+        <div class="row" style="margin-bottom:16px">
+          <div>
+            <h2 style="font-size:24px;font-weight:800;letter-spacing:-.025em">☀️ Today</h2>
+            <p class="dim" id="today-sub" style="font-size:12.5px;margin-top:2px">—</p>
+          </div>
+          <button class="open-task btn btn-soft"><i class="fa-solid fa-plus" style="font-size:11px"></i> New</button>
+        </div>
+        <div id="today-list" style="display:flex;flex-direction:column;gap:6px"></div>
+      </section>
+
+      <!-- UPCOMING -->
+      <section id="tab-upcoming" class="tab hidden">
+        <div class="row" style="margin-bottom:16px">
+          <div>
+            <h2 style="font-size:24px;font-weight:800;letter-spacing:-.025em">📅 Upcoming</h2>
+            <p class="dim" style="font-size:12.5px;margin-top:2px">Tasks scheduled ahead</p>
+          </div>
+          <button class="open-task btn btn-soft"><i class="fa-solid fa-plus" style="font-size:11px"></i> New</button>
+        </div>
+        <div id="upcoming-list" style="display:flex;flex-direction:column;gap:6px"></div>
+      </section>
+
+      <!-- POMODORO -->
+      <section id="tab-pomo" class="tab hidden">
+        <div style="margin-bottom:16px">
+          <h2 style="font-size:24px;font-weight:800;letter-spacing:-.025em">🍅 Pomodoro</h2>
+          <p class="dim" style="font-size:12.5px;margin-top:2px">Focus in 25-minute blocks</p>
+        </div>
+
+        <div class="card" style="padding:24px;text-align:center">
+          <div style="margin-bottom:20px">
+            <button id="pomo-chip" class="pill" style="max-width:100%">
+              <span>🎯</span>
+              <span id="pomo-task-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">No task selected</span>
+            </button>
+          </div>
+
+          <div style="display:inline-flex;padding:2px;border-radius:6px;background:var(--surface-2);border:1px solid var(--border);margin-bottom:24px">
+            <button data-mode="pomo" class="mode-btn btn" style="padding:5px 14px;font-size:12px">Focus</button>
+            <button data-mode="short" class="mode-btn btn" style="padding:5px 14px;font-size:12px">Short</button>
+            <button data-mode="long" class="mode-btn btn" style="padding:5px 14px;font-size:12px">Long</button>
+          </div>
+
+          <div style="position:relative;width:240px;height:240px;margin:0 auto 28px">
+            <svg viewBox="0 0 200 200" style="width:100%;height:100%;transform:rotate(-90deg)">
+              <circle cx="100" cy="100" r="88" fill="none" stroke="var(--surface-3)" stroke-width="4"/>
+              <circle id="ring" cx="100" cy="100" r="88" fill="none" stroke="var(--primary)" stroke-width="4"
+                      stroke-linecap="round" stroke-dasharray="552.92" stroke-dashoffset="0"
+                      style="transition:stroke-dashoffset .35s linear, stroke .2s"/>
+            </svg>
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none">
+              <div id="timer-display" style="font-size:46px;line-height:1">25:00</div>
+              <div id="timer-label" class="dim" style="font-size:10.5px;font-weight:700;margin-top:10px;text-transform:uppercase;letter-spacing:.14em">Focus</div>
+              <div id="timer-round" style="font-size:11px;margin-top:6px;color:var(--text-3)"></div>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:center;gap:8px">
+            <button id="timer-reset" style="width:36px;height:36px;border-radius:50%;background:var(--surface-2);
+              border:1px solid var(--border);color:var(--text-2)">
+              <i class="fa-solid fa-rotate-left" style="font-size:13px"></i>
+            </button>
+            <button id="timer-toggle" class="btn btn-primary" style="width:120px;height:36px;border-radius:18px;font-size:13px">
+              <i class="fa-solid fa-play" style="font-size:11px"></i> Start
+            </button>
+            <button id="timer-skip" style="width:36px;height:36px;border-radius:50%;background:var(--surface-2);
+              border:1px solid var(--border);color:var(--text-2)">
+              <i class="fa-solid fa-forward-step" style="font-size:13px"></i>
+            </button>
+          </div>
+
+          <p class="dim" style="font-size:12px;margin-top:20px">
+            <span id="pomo-count" class="tabular" style="font-weight:600;color:var(--text)">0</span> pomodoros today ·
+            <span id="pomo-mins" class="tabular" style="font-weight:600;color:var(--text)">0</span> min focused
+          </p>
+        </div>
+      </section>
+
+      <!-- ANALYTICS -->
+      <section id="tab-analytics" class="tab hidden">
+        <div class="row" style="margin-bottom:16px">
+          <div>
+            <h2 style="font-size:24px;font-weight:800;letter-spacing:-.025em">📊 Reports</h2>
+            <p class="dim" style="font-size:12.5px;margin-top:2px">Focus, tasks, spending &amp; academics</p>
+          </div>
+          <div style="display:inline-flex;padding:2px;border-radius:6px;background:var(--surface-2);border:1px solid var(--border)">
+            <button data-range="week" class="range-btn btn" style="padding:4px 10px;font-size:12px">7D</button>
+            <button data-range="month" class="range-btn btn" style="padding:4px 10px;font-size:12px">30D</button>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+          <div class="card" style="padding:14px">
+            <p style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3)">⏱️ Focus time</p>
+            <p id="ana-time" style="font-size:24px;font-weight:800;letter-spacing:-.03em;margin-top:6px">0h 0m</p>
+            <p id="ana-pomos" class="dim" style="font-size:12px;margin-top:2px">0 pomodoros</p>
+          </div>
+          <div class="card" style="padding:14px">
+            <p style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3)">✅ Tasks</p>
+            <p id="ana-tasks" style="font-size:24px;font-weight:800;letter-spacing:-.03em;margin-top:6px">0%</p>
+            <p id="ana-ratio" class="dim" style="font-size:12px;margin-top:2px">0 of 0</p>
+          </div>
+          <div class="card" style="padding:14px">
+            <p style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3)">💰 Spending</p>
+            <p id="ana-exp" style="font-size:24px;font-weight:800;letter-spacing:-.03em;margin-top:6px">$0.00</p>
+            <p class="dim" style="font-size:12px;margin-top:2px">In range</p>
+          </div>
+          <div class="card" style="padding:14px">
+            <p style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3)">🎓 CGPA</p>
+            <p id="ana-cgpa" style="font-size:24px;font-weight:800;letter-spacing:-.03em;margin-top:6px">0.00</p>
+            <p class="dim" style="font-size:12px;margin-top:2px">Cumulative</p>
+          </div>
+        </div>
+
+        <div class="card" style="padding:16px;margin-bottom:16px">
+          <h3 style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:12px">🔥 Daily focus</h3>
+          <div id="chart-focus" style="display:flex;align-items:flex-end;gap:3px;height:128px;padding-top:12px"></div>
+        </div>
+
+        <div class="card" style="padding:16px">
+          <h3 style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:12px">💸 Spending by category</h3>
+          <div id="chart-exp" style="display:flex;flex-direction:column;gap:12px"></div>
+        </div>
+      </section>
+
+      <!-- EXPENSES -->
+      <section id="tab-expenses" class="tab hidden">
+        <div style="margin-bottom:16px">
+          <h2 style="font-size:24px;font-weight:800;letter-spacing:-.025em">💰 Expenses</h2>
+          <p class="dim" style="font-size:12.5px;margin-top:2px">Track where your money goes</p>
+        </div>
+
+        <div class="card" style="padding:20px;margin-bottom:16px">
+          <div class="row" style="margin-bottom:16px;flex-wrap:wrap;gap:12px">
+            <span style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3)">Overview</span>
+            <div style="display:inline-flex;padding:2px;border-radius:6px;background:var(--surface-2);border:1px solid var(--border)">
+              <button data-filter="daily" class="exp-filter btn" style="padding:4px 10px;font-size:11.5px">Today</button>
+              <button data-filter="weekly" class="exp-filter btn" style="padding:4px 10px;font-size:11.5px">7D</button>
+              <button data-filter="monthly" class="exp-filter btn" style="padding:4px 10px;font-size:11.5px">Monthly</button>
+              <button data-filter="all" class="exp-filter btn" style="padding:4px 10px;font-size:11.5px">All</button>
+            </div>
+          </div>
+          <p id="exp-total" style="font-size:36px;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums">$0.00</p>
+          <p id="exp-label" class="dim" style="font-size:12.5px;margin-top:2px">Spent today</p>
+        </div>
+
+        <div class="row" style="margin-bottom:12px">
+          <h3 id="exp-title" style="font-size:14.5px;font-weight:700">Expense log</h3>
+          <button class="btn btn-soft" id="btn-open-expense"><i class="fa-solid fa-plus" style="font-size:11px"></i> Log</button>
+        </div>
+        <div id="exp-list" style="display:flex;flex-direction:column;gap:12px"></div>
+      </section>
+
+      <!-- GPA -->
+      <section id="tab-gpa" class="tab hidden">
+        <div style="margin-bottom:16px">
+          <h2 style="font-size:24px;font-weight:800;letter-spacing:-.025em">🎓 GPA Tracker</h2>
+          <p class="dim" style="font-size:12.5px;margin-top:2px">Continuous assessment + final exam</p>
+        </div>
+
+        <div class="card" style="padding:20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <div>
+            <p style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3)">Cumulative GPA</p>
+            <p id="cgpa" style="font-size:34px;font-weight:800;letter-spacing:-.03em;color:var(--primary);line-height:1.1;margin-top:4px">0.00</p>
+            <p id="cgpa-meta" class="dim" style="font-size:12px">0 credit hours</p>
+          </div>
+          <button id="open-gpa" class="btn btn-soft"><i class="fa-solid fa-plus" style="font-size:11px"></i> Course</button>
+        </div>
+        <div id="courses-list" style="display:flex;flex-direction:column;gap:8px"></div>
+      </section>
+
+      <!-- CALENDAR -->
+      <section id="tab-events" class="tab hidden">
+        <div style="margin-bottom:16px">
+          <h2 style="font-size:24px;font-weight:800;letter-spacing:-.025em">🗓️ Calendar</h2>
+          <p class="dim" style="font-size:12.5px;margin-top:2px">Events, tasks &amp; study sessions</p>
+        </div>
+
+        <div class="card" style="padding:20px;margin-bottom:16px">
+          <div class="row" style="margin-bottom:16px">
+            <h3 id="cal-title" style="font-size:15.5px;font-weight:700">—</h3>
+            <div style="display:flex;align-items:center;gap:4px">
+              <button id="cal-prev" style="width:28px;height:28px;border-radius:4px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-2)">
+                <i class="fa-solid fa-chevron-left" style="font-size:11px"></i>
+              </button>
+              <button id="cal-next" style="width:28px;height:28px;border-radius:4px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-2)">
+                <i class="fa-solid fa-chevron-right" style="font-size:11px"></i>
+              </button>
+              <button id="open-event" class="btn btn-soft" style="margin-left:6px"><i class="fa-solid fa-plus" style="font-size:11px"></i> Event</button>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;font-size:11px;font-weight:600;text-align:center;color:var(--text-3);margin-bottom:8px">
+            <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
+          </div>
+          <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px"></div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px 12px;padding-top:12px;margin-top:12px;border-top:1px solid var(--border);justify-content:center">
+            <span style="font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3)">Categories</span>
+            <span id="cal-legend" style="display:flex;flex-wrap:wrap;gap:6px 12px"></span>
+          </div>
+        </div>
+
+        <div class="card" style="padding:20px">
+          <div class="row" style="margin-bottom:12px">
+            <h3 id="agenda-title" style="font-size:14.5px;font-weight:700">Agenda</h3>
+            <span id="agenda-badge" class="pill">0 items</span>
+          </div>
+          <div id="agenda" style="display:flex;flex-direction:column;gap:8px"></div>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section id="tab-settings" class="tab hidden">
+        <div style="margin-bottom:16px">
+          <h2 style="font-size:24px;font-weight:800;letter-spacing:-.025em">⚙️ Settings</h2>
+          <p class="dim" style="font-size:12.5px;margin-top:2px">Backup &amp; data</p>
+        </div>
+
+        <div class="card" style="padding:20px;margin-bottom:16px">
+          <h3 style="font-size:14.5px;font-weight:700;margin-bottom:8px">📤 Backup &amp; restore</h3>
+          <p class="dim" style="font-size:12.5px;line-height:1.6;margin-bottom:12px">
+            Your data is saved to a file on disk automatically. Export it here to keep a copy elsewhere.
+          </p>
+          <div style="display:flex;gap:8px">
+            <button id="btn-export" class="btn btn-soft" style="flex:1"><i class="fa-solid fa-download" style="font-size:11px"></i> Export</button>
+            <button id="btn-import" class="btn btn-soft" style="flex:1"><i class="fa-solid fa-upload" style="font-size:11px"></i> Import</button>
+            <input type="file" id="import-file" accept="application/json" class="hidden">
+          </div>
+        </div>
+
+        <div class="card" style="padding:20px;margin-bottom:16px">
+          <h3 style="font-size:14.5px;font-weight:700;margin-bottom:8px">📁 Where is my data?</h3>
+          <p class="dim" id="data-path" style="font-size:12px;font-family:var(--mono);line-height:1.5;word-break:break-all">—</p>
+        </div>
+
+        <div class="card" style="padding:20px">
+          <h3 style="font-size:14.5px;font-weight:700;color:var(--danger);margin-bottom:8px">🗑️ Danger zone</h3>
+          <p class="dim" style="font-size:12.5px;margin-bottom:12px">Wipes every task, expense, course, event and pomodoro log.</p>
+          <button id="btn-reset" class="btn" style="width:100%;background:var(--danger-soft);color:var(--danger)">
+            <i class="fa-solid fa-trash" style="font-size:11px"></i> Erase all data
+          </button>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav style="flex-shrink:0;display:flex;background:var(--bg);border-top:1px solid var(--border);z-index:30">
+  <button data-tab="today" class="nav" style="flex:1;padding:8px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;font-weight:600;color:var(--primary)">
+    <i class="fa-solid fa-list-check" style="font-size:17px"></i>Today
+  </button>
+  <button data-tab="pomo" class="nav" style="flex:1;padding:8px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;font-weight:600;color:var(--text-2)">
+    <i class="fa-solid fa-stopwatch" style="font-size:17px"></i>Timer
+  </button>
+  <button data-tab="analytics" class="nav" style="flex:1;padding:8px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;font-weight:600;color:var(--text-2)">
+    <i class="fa-solid fa-chart-simple" style="font-size:17px"></i>Reports
+  </button>
+  <button data-tab="events" class="nav" style="flex:1;padding:8px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;font-weight:600;color:var(--text-2)">
+    <i class="fa-regular fa-calendar" style="font-size:17px"></i>Calendar
+  </button>
+</nav>
+
+<div id="toasts" style="position:fixed;bottom:100px;left:50%;transform:translateX(-50%);z-index:70;display:flex;flex-direction:column;align-items:center;gap:8px"></div>
+
+<!-- EMOJI PICKER -->
+<div id="modal-emoji" class="modal hidden modal-bg" style="position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:16px">
+  <div class="card fade" style="width:100%;max-width:440px;padding:16px;box-shadow:var(--shadow)">
+    <div class="row" style="margin-bottom:12px">
+      <h3 style="font-size:15px;font-weight:700">Pick an icon</h3>
+      <div style="display:flex;align-items:center;gap:4px">
+        <button id="emoji-random" style="width:28px;height:28px;border-radius:4px;color:var(--text-2)" title="Random">
+          <i class="fa-solid fa-shuffle" style="font-size:11px"></i>
+        </button>
+        <button id="emoji-remove" style="font-size:11.5px;font-weight:600;padding:4px 8px;border-radius:4px;color:var(--text-2)">Remove</button>
+        <button data-close="modal-emoji" style="width:28px;height:28px;border-radius:4px;color:var(--text-2)">
+          <i class="fa-solid fa-xmark" style="font-size:13px"></i>
+        </button>
+      </div>
+    </div>
+    <input type="text" id="emoji-search" class="inp" placeholder="Type an emoji or paste any character…" style="margin-bottom:12px">
+    <div id="emoji-tabs" style="display:flex;gap:2px;overflow-x:auto;margin:0 -4px 12px;padding:0 4px 4px"></div>
+    <div id="emoji-grid" style="display:grid;grid-template-columns:repeat(8,1fr);gap:2px;max-height:280px;overflow-y:auto"></div>
+  </div>
+</div>
+
+<!-- COVER PICKER -->
+<div id="modal-cover" class="modal hidden modal-bg" style="position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:16px">
+  <div class="card fade" style="width:100%;max-width:440px;padding:16px;box-shadow:var(--shadow);max-height:90vh;overflow-y:auto">
+    <div class="row" style="margin-bottom:16px">
+      <h3 style="font-size:15px;font-weight:700">Cover</h3>
+      <button data-close="modal-cover" style="width:28px;height:28px;border-radius:4px;color:var(--text-2)">
+        <i class="fa-solid fa-xmark" style="font-size:13px"></i>
+      </button>
+    </div>
+    <div style="margin-bottom:16px">
+      <p style="font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);margin-bottom:8px">Gradients</p>
+      <div id="cover-gradients" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px"></div>
+    </div>
+    <div style="margin-bottom:16px">
+      <p style="font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);margin-bottom:8px">Solid colors</p>
+      <div id="cover-solids" style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px"></div>
+    </div>
+    <div>
+      <p style="font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);margin-bottom:8px">Custom</p>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <input type="url" id="cover-url" class="inp" placeholder="Paste image URL…" style="flex:1">
+        <button id="cover-url-set" class="btn btn-soft">Set</button>
+      </div>
+      <label class="btn btn-soft" style="width:100%;cursor:pointer;justify-content:center">
+        <i class="fa-solid fa-upload" style="font-size:11px"></i> Upload from device
+        <input type="file" id="cover-file" accept="image/*" class="hidden">
+      </label>
+    </div>
+  </div>
+</div>
+
+<!-- TASK MODAL -->
+<div id="modal-task" class="modal hidden modal-bg" style="position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:16px">
+  <div class="card fade" style="width:100%;max-width:380px;padding:20px;box-shadow:var(--shadow)">
+    <h3 id="task-title-modal" style="font-size:16px;font-weight:700;margin-bottom:16px">New Task</h3>
+    <input type="hidden" id="task-id">
+    <div style="margin-bottom:12px">
+      <label style="font-size:11.5px;font-weight:600;color:var(--text-2);display:block;margin-bottom:6px">Task name</label>
+      <input type="text" id="task-title" class="inp" placeholder="e.g. Read Chapter 4">
+    </div>
+    <div style="display:flex;gap:12px;margin-bottom:12px">
+      <div style="flex:1">
+        <label style="font-size:11.5px;font-weight:600;color:var(--text-2);display:block;margin-bottom:6px">Est. pomodoros</label>
+        <input type="number" id="task-est" min="1" max="20" value="2" class="inp tabular">
+      </div>
+      <div style="flex:1">
+        <label style="font-size:11.5px;font-weight:600;color:var(--text-2);display:block;margin-bottom:6px">Due date</label>
+        <input type="date" id="task-date" class="inp">
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn btn-ghost" style="flex:1" data-close="modal-task">Cancel</button>
+      <button id="save-task" class="btn btn-primary" style="flex:1">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXPENSE MODAL -->
+<div id="modal-expense" class="modal hidden modal-bg" style="position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:16px">
+  <div class="card fade" style="width:100%;max-width:380px;padding:20px;box-shadow:var(--shadow)">
+    <h3 id="exp-title-modal" style="font-size:16px;font-weight:700;margin-bottom:16px">Log Expense</h3>
+    <input type="hidden" id="exp-id">
+    <div style="margin-bottom:12px">
+      <label style="font-size:11.5px;font-weight:600;color:var(--text-2);display:block;margin-bottom:6px">Description</label>
+      <input type="text" id="exp-name" class="inp" placeholder="e.g. Lunch">
+    </div>
+    <div style="display:flex;gap:12px;margin-bottom:12px">
+      <div style="flex:1">
+        <label style="font-size:11.5px;font-weight:600;color:var(--text-2);display:block;margin-bottom:6px">Amount</label>
+        <input type="number" id="exp-amount" placeholder="0.00" step="0.01" min="0" class="inp tabular">
+      </div>
+      <div style="flex:1">
+        <label style="font-size:11.5px;font-weight:600;color:var(--text-2);display:block;margin-bottom:6px">Date</label>
+        <input type="date" id="exp-date" class="inp">
+      </div>
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11.5px;font-weight:600;color:var(--text-2);display:block;margin-bottom:6px">Category</label>
+      <select id="exp-category" class="inp">
+        <option value="Food">🍔 Food &amp; Dining</option>
+        <option value="Books">📚 Books &amp; Supplies</option>
+        <option value="Transport">🚌 Transport</option>
+        <option value="Housing">🏠 Housing &amp; Rent</option>
+        <option value="Entertainment">🎮 Entertainment</option>
+        <option value="Other">📦 Other</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn btn-ghost" style="flex:1" data-close="modal-expense">Cancel</button>
+      <button id="save-expense" class="btn btn-primary" style="flex:1">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- GPA MODAL -->
+<div id="modal-gpa" class="modal hidden modal-bg" style="position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:16px">
+  <div class="card fade" style="width:100%;max-width:480px;padding:20px;box-shadow:var(--shadow);max-height:90vh;overflow-y:auto">
+    <h3 style="font-size:16px;font-weight:700;margin-bottom:16px">Add Course</h3>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11.5px;font-weight:600;color:var(--text-2);display:block;margin-bottom:6px">Quick pick</label>
+      <select id="gpa-quick" class="inp">
+        <option value="">— Custom course —</option>
+        <option value="Entrepreneurship (Entr1006)|3">Entrepreneurship · 3 cr</option>
+        <option value="Communicative Language Skills I (FLEn 1003)|3">Communicative English I · 3 cr</option>
+        <option value="Geography of Ethiopia and the Horn (GeEs 1005)|3">Geography of Ethiopia · 3 cr</option>
+        <option value="Mathematics for Natural Science (Math 1007)|3">Math for Natural Science · 3 cr</option>
+        <option value="Logic and Critical Thinking (Phil 1009)|3">Logic &amp; Critical Thinking · 3 cr</option>
+        <option value="General Psychology (Psyc 1011)|3">General Psychology · 3 cr</option>
+        <option value="Social Anthropology (Anth 1002)|2">Social Anthropology · 2 cr</option>
+        <option value="General Physics (Phys 1001)|3">General Physics · 3 cr</option>
+        <option value="Communicative English Skills II (FLEn 1004)|3">Communicative English II · 3 cr</option>
+        <option value="Introduction to Emerging Technology (EmTe 1008)|3">Emerging Technology · 3 cr</option>
+        <option value="General Chemistry (Chem 1006)|3">General Chemistry · 3 cr</option>
+        <option value="Global Trend (GLTr 2011)|2">Global Trend · 2 cr</option>
+        <option value="Inclusiveness (Incl 1010)|2">Inclusiveness · 2 cr</option>
+        <option value="Moral and Civic Education (MCiE 1012)|2">Moral &amp; Civic Education · 2 cr</option>
+        <option value="Economics (Econ 2009)|3">Economics · 3 cr</option>
+        <option value="History of Ethiopia and the Horn (Hist 2002)|3">History of Ethiopia · 3 cr</option>
+        <option value="Applied Mathematics IA (Math 1014)|4">Applied Math IA · 4 cr</option>
+        <option value="Applied Mathematics IB (Math 1014)|4">Applied Math IB · 4 cr</option>
+        <option value="Applied Mathematics IIB (Math 2007)|4">Applied Math IIB · 4 cr</option>
+      </select>
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11.5px;font-weight:600;color:var(--text-2);display:block;margin-bottom:6px">Course name &amp; code</label>
+      <input type="text" id="gpa-name" class="inp">
+    </div>
+    <div style="display:flex;gap:12px;margin-bottom:12px">
+      <div style="flex:1">
+        <label style="font-size:11.5px;font-weight:600;color:var(--text-2);display:block;margin-bottom:6px">Credits</label>
+        <input type="number" id="gpa-credits" min="1" max="10" value="3" class="inp tabular">
+      </div>
+      <div style="flex:1">
+        <label style="font-size:11.5px;font-weight:600;color:var(--text-2);display:block;margin-bottom:6px">Continuous /50</label>
+        <input type="number" id="gpa-cont" min="0" max="50" value="35" class="inp tabular">
+      </div>
+      <div style="flex:1">
+        <label style="font-size:11.5px;font-weight:600;color:var(--text-2);display:block;margin-bottom:6px">Final /50</label>
+        <input type="number" id="gpa-final" min="0" max="50" value="30" class="inp tabular">
+      </div>
+    </div>
+    <p class="dim" style="font-size:11.5px;margin-bottom:12px">Final exam must be ≥ 20/50 (40%) to pass.</p>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn btn-ghost" style="flex:1" data-close="modal-gpa">Cancel</button>
+      <button id="save-gpa" class="btn btn-primary" style="flex:1">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- EVENT MODAL -->
+<div id="modal-event" class="modal hidden modal-bg" style="position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:16px">
+  <div class="card fade" style="width:100%;max-width:380px;padding:20px;box-shadow:var(--shadow);max-height:92vh;overflow-y:auto">
+    <h3 id="event-title-modal" style="font-size:16px;font-weight:700;margin-bottom:16px">New Event</h3>
+    <input type="hidden" id="event-id">
+    <div style="margin-bottom:12px">
+      <label style="font-size:11.5px;font-weight:600;color:var(--text-2);display:block;margin-bottom:6px">Title</label>
+      <input type="text" id="event-name" class="inp" placeholder="e.g. Physics midterm revision">
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11.5px;font-weight:600;color:var(--text-2);display:block;margin-bottom:6px">Date</label>
+      <input type="date" id="event-date" class="inp">
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11.5px;font-weight:600;color:var(--text-2);display:block;margin-bottom:6px">Category</label>
+      <div id="event-cats" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px"></div>
+    </div>
+    <div id="event-study" class="soft hidden" style="padding:14px">
+      <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+        <input type="checkbox" id="event-link" checked style="margin-top:2px">
+        <span style="font-size:12.5px;font-weight:600;line-height:1.4">
+          Link to Pomodoro
+          <span style="display:block;font-size:11.5px;font-weight:400;color:var(--text-2);margin-top:2px">
+            Creates a focus task on the same date so you can run sessions against it.
+          </span>
+        </span>
+      </label>
+      <div id="event-est-wrap" style="margin-top:12px">
+        <label style="font-size:11.5px;font-weight:600;color:var(--text-2);display:block;margin-bottom:6px">Estimated pomodoros</label>
+        <input type="number" id="event-est" min="1" max="20" value="2" class="inp tabular">
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn btn-ghost" style="flex:1" data-close="modal-event">Cancel</button>
+      <button id="save-event" class="btn btn-primary" style="flex:1">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM -->
+<div id="modal-confirm" class="hidden modal-bg" style="position:fixed;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;padding:16px">
+  <div class="card fade" style="width:100%;max-width:320px;padding:20px;box-shadow:var(--shadow)">
+    <h3 style="font-size:15px;font-weight:700;margin-bottom:8px">Are you sure?</h3>
+    <p id="confirm-msg" class="dim" style="font-size:12.5px;line-height:1.5;margin-bottom:16px"></p>
+    <div style="display:flex;gap:8px">
+      <button id="confirm-cancel" class="btn btn-ghost" style="flex:1">Cancel</button>
+      <button id="confirm-ok" class="btn btn-danger" style="flex:1">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   CONSTANTS
+   ═══════════════════════════════════════════════════════ */
+const STORE = 'focus_todo_v4';
+const TIMER_KEY = 'focus_todo_timer';
+const THEME_KEY = 'focus_todo_theme';
+const DEFAULT_ICON = '⏱️';
+
+const EVENT_CATS = {
+  Study:      { emoji:'📖', color:'#2383e2' },
+  Assignment: { emoji:'✏️', color:'#d9730d' },
+  Class:      { emoji:'🎓', color:'#0f7b6c' },
+  Exam:       { emoji:'📝', color:'#eb5757' },
+  Personal:   { emoji:'🌿', color:'#9065b0' },
+  Other:      { emoji:'📌', color:'#787774' }
+};
+const POMO_CATS = ['Study','Assignment'];
+
+const EXP_CATS = {
+  Food:          { emoji:'🍔', color:'#d9730d' },
+  Books:         { emoji:'📚', color:'#2383e2' },
+  Transport:     { emoji:'🚌', color:'#0f7b6c' },
+  Housing:       { emoji:'🏠', color:'#9065b0' },
+  Entertainment: { emoji:'🎮', color:'#eb5757' },
+  Other:         { emoji:'📦', color:'#787774' }
+};
+
+const MODES = {
+  pomo:  { label:'Focus',       seconds:1500, stroke:'#2383e2' },
+  short: { label:'Short Break', seconds:300,  stroke:'#0f7b6c' },
+  long:  { label:'Long Break',  seconds:900,  stroke:'#9065b0' }
+};
+const RING_C = 552.92;
+
+const EMOJIS = {
+  '⭐': ['⏱️','🍅','🎯','🔥','⚡','💡','✅','📝','📚','🚀','🌱','💪','🧠','🎓','🏆','⭐','💯','🎨','🎵','☕','🌙','☀️','✨','💎','🎁','🔑','🧩','🏅','🗓️','🎉'],
+  '😊': ['😀','😃','😄','😁','😆','😅','🤣','😂','🙂','😊','😇','🥰','😍','🤩','😎','🤓','🧐','🤔','😴','🤗','🤭','🤫','😢','😭','😤','😡','🥺','😳','🥶','😱','🤯','😷','🤒','🤕'],
+  '🌿': ['🌸','🌺','🌻','🌷','🌹','🌾','🌿','☘️','🍀','🍃','🍂','🍁','🌱','🌲','🌳','🌴','🌵','🌈','☀️','🌙','⭐','✨','⚡','🔥','🌊','💧','☔','🌍'],
+  '🍔': ['🍎','🍊','🍋','🍌','🍉','🍇','🍓','🍒','🍑','🥭','🍍','🥝','🍅','🥑','🍆','🥕','🌽','🥒','🥬','🥦','🍄','🍞','🧀','🥚','🍳','🍔','🍟','🍕','🌭','🥪','🌮','🍝','🍜','🍲','🍣','🍱','🍙','🍰','🎂','🍫','🍩','🍪','☕','🍵','🥤'],
+  '📚': ['⌚','📱','💻','⌨️','🖥️','🖨️','🖱️','🕹️','💾','📷','📹','🎥','📞','📺','📻','🎙️','⏱️','⏰','⌛','📡','🔋','🔌','💡','🔦','🕯️','💰','💳','💎','🔧','🔨','⚙️','🔬','🔭','💊','💉','🧬','🧪','🌡️','🔑','🗝️','🚪','🪑','🛋️','🛏️','🧸','🎁','🎈','🎀','✉️','📧','💌','📦','📜','📄','📊','📈','📉','🗓️','📅','🗑️','📋','📁','📂','📓','📔','📒','📕','📗','📘','📙','📚','📖','🔖','🔗','📎','📐','📏','🧮','📌','📍','✂️','🖊️','✒️','🖌️','🖍️','📝','✏️','🔍','🔎','🔒','🔓'],
+  '❤️': ['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟','❌','⭕','✅','⚠️','♻️','🔴','🟠','🟡','🟢','🔵','🟣','⚫','⚪','🟤','🔺','🔻','🔸','🔹','🔶','🔷'],
+  '⚽': ['⚽','🏀','🏈','⚾','🎾','🏐','🎱','🏓','🏸','🏒','⛳','🏹','🎣','🥊','🥋','🎽','🛹','🎿','🏂','🏋️','🤸','🏄','🏊','🚴','🏆','🥇','🥈','🥉','🎖️','🎫','🎪','🎭','🎨','🎬','🎤','🎧','🎼','🎹','🥁','🎷','🎺','🎸','🎻','🎲','🎯','🎳','🎮','🎰'],
+  '✈️': ['🚗','🚕','🚙','🚌','🏎️','🚓','🚑','🚒','🚐','🚚','🚲','🛵','🏍️','🚂','🚆','🚇','🚊','🚉','✈️','🛫','🛬','🚀','🚁','⛵','🚢','⚓','🗺️','🗽','🗼','🏰','🏯','🎡','🎢','🏖️','🏝️','🌋','⛰️','🏔️','🏕️','⛺','🏠','🏡','🏢','🏬','🏥','🏦','🏨','🏪','🏫','🌅','🌄','🌆','🌃']
+};
+
+const COVER_GRADIENTS = [
+  ['sunrise','linear-gradient(135deg,#f6d365 0%,#fda085 100%)'],
+  ['peach','linear-gradient(135deg,#ffecd2 0%,#fcb69f 100%)'],
+  ['rose','linear-gradient(135deg,#ff9a9e 0%,#fecfef 100%)'],
+  ['lavender','linear-gradient(135deg,#a18cd1 0%,#fbc2eb 100%)'],
+  ['ocean','linear-gradient(135deg,#667eea 0%,#764ba2 100%)'],
+  ['sky','linear-gradient(135deg,#89f7fe 0%,#66a6ff 100%)'],
+  ['mint','linear-gradient(135deg,#a8edea 0%,#fed6e3 100%)'],
+  ['forest','linear-gradient(135deg,#d4fc79 0%,#96e6a1 100%)'],
+  ['citrus','linear-gradient(135deg,#f093fb 0%,#f5576c 100%)'],
+  ['aurora','linear-gradient(135deg,#4facfe 0%,#00f2fe 100%)'],
+  ['flamingo','linear-gradient(135deg,#ff9a9e 0%,#fad0c4 100%)'],
+  ['dusk','linear-gradient(135deg,#30cfd0 0%,#330867 100%)']
+];
+const COVER_SOLIDS = ['#e3e2e0','#eedfd5','#fadec9','#fdecc8','#dbeddb','#d3e5ef','#e8deee','#f5e0e9','#ffe2dd','#eef1f3','#f0e3dd','#e1e7ec'];
+
+/* ═══════════════════════════════════════════════════════
+   HELPERS
+   ═══════════════════════════════════════════════════════ */
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+const parseDate = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y,m-1,d); };
+let _uid = 0;
+const uid = () => Date.now()*1000 + (_uid++ % 1000);
+const daysAgo = n => { const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()-n); return d; };
+const localDate = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const lastN = n => { const out = []; for (let i=n-1;i>=0;i--) out.push(localDate(daysAgo(i))); return out; };
+const fmtDur = m => { const h = Math.floor(m/60), mm = Math.round(m%60); return h>0 ? `${h}h ${mm}m` : `${mm}m`; };
+
+/* ═══════════════════════════════════════════════════════
+   STATE
+   ═══════════════════════════════════════════════════════ */
+let appData = {
+  tasks:[], expenses:[], courses:[], events:[], pomoLog:{}, energy:0,
+  page:{ icon: DEFAULT_ICON, cover: null }
+};
+let timer = { mode:'pomo', running:false, endAt:null, remaining:1500, total:1500, taskId:null };
+let activeFocus = null;
+let expFilter = 'daily';
+let anaRange = 'week';
+let calCursor = new Date();
+let calSelected = today();
+let eventDraftCat = 'Study';
+let emojiTab = '⭐';
+let nativeReady = false;
+
+/* ═══════════════════════════════════════════════════════
+   NATIVE BRIDGE
+   ═══════════════════════════════════════════════════════ */
+const Native = {
+  async wait(){
+    for (let i=0;i<40;i++){
+      if (window.pywebview?.api) { nativeReady = true; return true; }
+      await new Promise(r => setTimeout(r, 50));
+    }
+    return false;
+  },
+  async save(obj){
+    if (!window.pywebview?.api) return false;
+    try {
+      const path = await window.pywebview.api.save_local('data.json', JSON.stringify(obj));
+      const el = $('data-path');
+      if (el) el.textContent = path;
+      return true;
+    } catch(e){ console.warn('save error', e); return false; }
+  },
+  async load(){
+    if (!window.pywebview?.api) return null;
+    try {
+      const raw = await window.pywebview.api.load_local('data.json');
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch(e){ console.warn('load error', e); return null; }
+  }
+};
+
+/* ═══════════════════════════════════════════════════════
+   PERSISTENCE
+   ═══════════════════════════════════════════════════════ */
+function loadLocal(){
+  try {
+    const raw = localStorage.getItem(STORE);
+    if (raw) appData = Object.assign(appData, JSON.parse(raw));
+  } catch(e){}
+  ['tasks','expenses','courses','events'].forEach(k => { if (!Array.isArray(appData[k])) appData[k] = []; });
+  if (!appData.pomoLog || typeof appData.pomoLog !== 'object') appData.pomoLog = {};
+  if (!appData.page) appData.page = { icon: DEFAULT_ICON, cover: null };
+  appData.tasks.forEach(t => { if (typeof t.act !== 'number') t.act = 0; if (!t.log) t.log = {}; });
+  appData.events.forEach(ev => { if (!ev.category || !EVENT_CATS[ev.category]) ev.category = 'Other'; });
+}
+
+function saveData(){
+  try { localStorage.setItem(STORE, JSON.stringify(appData)); } catch(e){}
+  Native.save(appData);
+}
+
+function loadTimer(){
+  try {
+    const t = JSON.parse(localStorage.getItem(TIMER_KEY) || 'null');
+    if (t && MODES[t.mode]) timer = Object.assign(timer, t);
+  } catch(e){}
+  if (timer.running && timer.endAt){
+    const rem = Math.round((timer.endAt - Date.now())/1000);
+    if (rem <= 0) { timer.running = false; timer.endAt = null; timer.remaining = timer.total; }
+    else timer.remaining = rem;
+  } else {
+    timer.running = false;
+    timer.total = MODES[timer.mode].seconds;
+    if (!timer.remaining || timer.remaining > timer.total) timer.remaining = timer.total;
+  }
+}
+function saveTimer(){ try{ localStorage.setItem(TIMER_KEY, JSON.stringify(timer)); }catch(e){} }
+
+/* ═══════════════════════════════════════════════════════
+   UI PRIMITIVES
+   ═══════════════════════════════════════════════════════ */
+function toast(msg){
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  $('toasts').appendChild(el);
+  requestAnimationFrame(() => el.classList.add('show'));
+  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); }, 2600);
+}
+
+function confirmDialog(msg){
+  return new Promise(resolve => {
+    $('confirm-msg').textContent = msg;
+    const m = $('modal-confirm');
+    m.classList.remove('hidden');
+    const ok = $('confirm-ok'), cancel = $('confirm-cancel');
+    const done = v => { m.classList.add('hidden'); ok.onclick = null; cancel.onclick = null; resolve(v); };
+    ok.onclick = () => done(true);
+    cancel.onclick = () => done(false);
+  });
+}
+
+function beep(){
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    const ctx = new Ctx();
+    const play = (f, at, dur) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = 'sine'; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, ctx.currentTime + at);
+      g.gain.exponentialRampToValueAtTime(0.18, ctx.currentTime + at + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + at + dur);
+      o.start(ctx.currentTime + at); o.stop(ctx.currentTime + at + dur + 0.05);
+    };
+    play(880, 0, .35); play(1174, .22, .5);
+    setTimeout(() => ctx.close(), 1500);
+  } catch(e){}
+}
+
+function emptyState(emoji, title, sub){
+  return `<div class="card" style="padding:40px 20px;text-align:center;border-style:dashed">
+    <div style="font-size:36px;line-height:1;margin-bottom:10px">${emoji}</div>
+    <p style="font-size:13px;font-weight:600;color:var(--text-2)">${title}</p>
+    <p style="font-size:12px;margin-top:4px;color:var(--text-3)">${sub}</p>
+  </div>`;
+}
+
+function catChip(name){
+  const c = EVENT_CATS[name] || EVENT_CATS.Other;
+  return `<span class="chip" style="background:${c.color}1a;color:${c.color}">
+    <span style="font-size:11px">${c.emoji}</span>${esc(name)}</span>`;
+}
+
+/* ═══════════════════════════════════════════════════════
+   THEME
+   ═══════════════════════════════════════════════════════ */
+function applyTheme(dark){
+  document.documentElement.classList.toggle('dark', dark);
+  $('btn-theme').innerHTML = dark
+    ? '<i class="fa-solid fa-sun" style="font-size:12px"></i>'
+    : '<i class="fa-solid fa-moon" style="font-size:12px"></i>';
+  localStorage.setItem(THEME_KEY, dark ? 'dark' : 'light');
+  renderTimer();
+}
+
+/* ═══════════════════════════════════════════════════════
+   NAV
+   ═══════════════════════════════════════════════════════ */
+let sidebarOpen = false;
+function openSidebar(){ sidebarOpen = true; $('sidebar').style.transform = 'translateX(0)'; $('scrim').classList.remove('hidden'); }
+function closeSidebar(){ sidebarOpen = false; $('sidebar').style.transform = 'translateX(-100%)'; $('scrim').classList.add('hidden'); }
+
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach(el => el.classList.add('hidden'));
+  const target = $('tab-' + tab);
+  if (target){ target.classList.remove('hidden'); target.classList.add('fade'); }
+
+  document.querySelectorAll('.nav').forEach(el => {
+    const on = el.dataset.tab === tab;
+    if (el.classList.contains('side-item')){
+      el.classList.toggle('active', on);
+    } else {
+      el.style.color = on ? 'var(--primary)' : 'var(--text-2)';
+    }
+  });
+
+  if (tab === 'analytics') renderAnalytics();
+  if (tab === 'pomo') renderPomoExtras();
+  if (window.innerWidth < 768 && sidebarOpen) closeSidebar();
+  $('main').scrollTop = 0;
+}
+
+/* ═══════════════════════════════════════════════════════
+   PAGE HEADER
+   ═══════════════════════════════════════════════════════ */
+function renderPageHeader(){
+  const cover = $('page-cover');
+  const coverBg = $('cover-bg');
+  const icon = appData.page?.icon;
+  const coverCss = appData.page?.cover;
+
+  if (icon){
+    $('page-icon').textContent = icon;
+    $('page-icon').style.fontSize = '62px';
+    $('page-icon').style.padding = '8px';
+    $('page-icon').style.marginLeft = '-8px';
+    $('page-icon').style.border = 'none';
+  } else {
+    $('page-icon').textContent = '＋ Add icon';
+    $('page-icon').style.fontSize = '14px';
+    $('page-icon').style.padding = '6px 10px';
+    $('page-icon').style.marginLeft = '0';
+    $('page-icon').style.border = '1.5px dashed var(--border-strong)';
+    $('page-icon').style.fontWeight = '600';
+  }
+
+  if (coverCss){
+    cover.classList.remove('hidden');
+    coverBg.style.background = coverCss;
+    $('icon-row').style.marginTop = '-52px';
+    $('cover-add').classList.add('hidden');
+  } else {
+    cover.classList.add('hidden');
+    $('icon-row').style.marginTop = '22px';
+    $('cover-add').classList.remove('hidden');
+  }
+
+  cover.onmouseenter = () => $('cover-controls').style.opacity = '1';
+  cover.onmouseleave = () => $('cover-controls').style.opacity = '0';
+  $('icon-row').onmouseenter = () => document.querySelectorAll('.icon-hint').forEach(b => b.style.opacity = '1');
+  $('icon-row').onmouseleave = () => document.querySelectorAll('.icon-hint').forEach(b => b.style.opacity = '0');
+}
+
+function setIcon(emoji){ appData.page.icon = emoji || null; saveData(); renderPageHeader(); }
+function setCover(css){ appData.page.cover = css || null; saveData(); renderPageHeader(); }
+
+/* ═══════════════════════════════════════════════════════
+   EMOJI PICKER
+   ═══════════════════════════════════════════════════════ */
+function renderEmojiTabs(){
+  $('emoji-tabs').innerHTML = Object.keys(EMOJIS).map(t =>
+    `<button class="emoji-tab ${t===emojiTab?'on':''}" data-emoji-tab="${esc(t)}">${t}</button>`
+  ).join('');
+}
+
+function renderEmojiGrid(){
+  const list = EMOJIS[emojiTab] || [];
+  $('emoji-grid').innerHTML = list.map(e =>
+    `<button class="emoji-cell" data-emoji="${e}">${e}</button>`
+  ).join('');
+}
+
+function openEmojiPicker(){
+  emojiTab = '⭐';
+  $('emoji-search').value = '';
+  renderEmojiTabs();
+  renderEmojiGrid();
+  $('modal-emoji').classList.remove('hidden');
+}
+
+/* ═══════════════════════════════════════════════════════
+   COVER PICKER
+   ═══════════════════════════════════════════════════════ */
+function renderCoverGrids(){
+  const cur = appData.page?.cover || '';
+  $('cover-gradients').innerHTML = COVER_GRADIENTS.map(([n,css]) =>
+    `<div class="cover-cell ${cur===css?'on':''}" data-cover="${esc(css)}" style="background:${css}" title="${n}"></div>`
+  ).join('');
+  $('cover-solids').innerHTML = COVER_SOLIDS.map(c =>
+    `<div class="cover-cell ${cur===c?'on':''}" data-cover="${c}" style="background:${c};aspect-ratio:1" title="${c}"></div>`
+  ).join('');
+}
+
+function openCoverPicker(){
+  renderCoverGrids();
+  $('cover-url').value = '';
+  $('modal-cover').classList.remove('hidden');
+}
+
+/* ═══════════════════════════════════════════════════════
+   TASKS
+   ═══════════════════════════════════════════════════════ */
+function tomatoRow(act, est){
+  const MAX = 6, shown = Math.min(est, MAX);
+  let html = '<div style="display:flex;align-items:center;gap:4px">';
+  for (let i=0;i<shown;i++) html += `<span class="tomato ${i<act?'on':''}"></span>`;
+  html += '</div>';
+  if (est > MAX) html += `<span class="dim tabular" style="font-size:10.5px">+${est-MAX}</span>`;
+  return html;
+}
+
+function taskCard(t){
+  const isActive = activeFocus === t.id;
+  const style = isActive
+    ? 'border-color:var(--primary);background:var(--primary-soft)'
+    : '';
+  return `
+    <div class="card" style="padding:12px;display:flex;align-items:flex-start;gap:12px;${style}">
+      <button class="chk ${t.done?'on':''}" data-toggle="${t.id}" aria-label="Toggle">
+        ${t.done ? '<i class="fa-solid fa-check"></i>' : ''}
+      </button>
+      <div style="flex:1;min-width:0">
+        <p style="font-size:13.5px;font-weight:600;line-height:1.35;cursor:pointer;
+           ${t.done ? 'text-decoration:line-through;color:var(--text-2)' : ''}"
+           data-edit="${t.id}">${esc(t.title)}</p>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap">
+          ${tomatoRow(t.act, t.est)}
+          <span class="dim tabular" style="font-size:11px;font-weight:600">${t.act}/${t.est}</span>
+          <span class="dim" style="font-size:11px">·</span>
+          <span class="dim" style="font-size:11px">${t.date === today() ? 'Today' : t.date}</span>
+          ${t.cat ? catChip(t.cat) : ''}
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:2px;flex-shrink:0">
+        <button data-focus="${t.id}" title="Focus this task"
+          style="width:28px;height:28px;border-radius:4px;display:flex;align-items:center;justify-content:center;
+          background:${isActive?'var(--primary)':'transparent'};color:${isActive?'#fff':'var(--text-2)'}">
+          <i class="fa-solid fa-play" style="font-size:10px"></i>
+        </button>
+        <button data-delete="${t.id}" title="Delete"
+          style="width:28px;height:28px;border-radius:4px;color:var(--text-2)">
+          <i class="fa-regular fa-trash-can" style="font-size:11px"></i>
+        </button>
+      </div>
+    </div>`;
+}
+
+function renderTasks(){
+  const t = today();
+  const todayTasks = appData.tasks.filter(x => x.date === t);
+  const upcoming = appData.tasks.filter(x => x.date !== t).sort((a,b) => a.date.localeCompare(b.date));
+
+  $('today-list').innerHTML = todayTasks.length
+    ? todayTasks.map(taskCard).join('')
+    : emptyState('☕','No tasks for today','Add one to get started.');
+
+  $('upcoming-list').innerHTML = upcoming.length
+    ? upcoming.map(taskCard).join('')
+    : emptyState('📅','Nothing upcoming','Your future tasks will appear here.');
+
+  const done = todayTasks.filter(x => x.done).length;
+  $('today-sub').textContent = todayTasks.length
+    ? `${done} of ${todayTasks.length} done · ${todayTasks.reduce((a,x) => a + x.act, 0)} pomodoros logged`
+    : 'No tasks scheduled';
+}
+
+document.addEventListener('click', async e => {
+  const toggleBtn = e.target.closest('[data-toggle]');
+  if (toggleBtn){
+    const t = appData.tasks.find(x => x.id === +toggleBtn.dataset.toggle);
+    if (t){ t.done = !t.done; saveData(); renderTasks(); renderCalendar(); }
+    return;
+  }
+  const editBtn = e.target.closest('[data-edit]');
+  if (editBtn){ openTaskModal(+editBtn.dataset.edit); return; }
+
+  const focusBtn = e.target.closest('[data-focus]');
+  if (focusBtn){ setFocusTask(+focusBtn.dataset.focus); return; }
+
+  const delBtn = e.target.closest('[data-delete]');
+  if (delBtn){
+    if (!await confirmDialog('This task and its pomodoro history will be permanently deleted.')) return;
+    const id = +delBtn.dataset.delete;
+    if (activeFocus === id) clearFocus();
+    appData.tasks = appData.tasks.filter(x => x.id !== id);
+    saveData(); renderTasks(); renderCalendar(); renderAnalytics();
+    toast('Task deleted');
+    return;
+  }
+
+  const expEdit = e.target.closest('[data-exp-edit]');
+  if (expEdit){ openExpenseModal(+expEdit.dataset.expEdit); return; }
+
+  const expDel = e.target.closest('[data-exp-del]');
+  if (expDel){
+    if (!await confirmDialog('This expense will be permanently removed.')) return;
+    appData.expenses = appData.expenses.filter(x => x.id !== +expDel.dataset.expDel);
+    saveData(); renderExpenses(); renderAnalytics();
+    toast('Expense deleted');
+    return;
+  }
+
+  const courseDel = e.target.closest('[data-course-del]');
+  if (courseDel){
+    if (!await confirmDialog('Remove this course and its grade?')) return;
+    appData.courses = appData.courses.filter(x => x.id !== +courseDel.dataset.courseDel);
+    saveData(); renderGPA(); renderAnalytics();
+    toast('Course removed');
+    return;
+  }
+
+  const eventEdit = e.target.closest('[data-event-edit]');
+  if (eventEdit){ openEventModal(+eventEdit.dataset.eventEdit); return; }
+
+  const eventDel = e.target.closest('[data-event-del]');
+  if (eventDel){
+    const id = +eventDel.dataset.eventDel;
+    const ev = appData.events.find(x => x.id === id);
+    const hasTask = ev?.linkedTaskId && appData.tasks.some(t => t.id === ev.linkedTaskId);
+    const ok = await confirmDialog(hasTask
+      ? 'Delete this event and its linked Pomodoro task?'
+      : 'Delete this event?');
+    if (!ok) return;
+    if (hasTask){
+      if (activeFocus === ev.linkedTaskId) clearFocus();
+      appData.tasks = appData.tasks.filter(t => t.id !== ev.linkedTaskId);
+    }
+    appData.events = appData.events.filter(x => x.id !== id);
+    saveData(); renderTasks(); renderCalendar(); renderAnalytics();
+    toast('Event deleted');
+    return;
+  }
+});
+
+function openTaskModal(id = null){
+  const editing = id !== null;
+  $('task-title-modal').textContent = editing ? 'Edit Task' : 'New Task';
+  $('task-id').value = editing ? id : '';
+  const t = editing ? appData.tasks.find(x => x.id === id) : null;
+  $('task-title').value = t ? t.title : '';
+  $('task-est').value = t ? t.est : 2;
+  $('task-date').value = t ? t.date : today();
+  $('modal-task').classList.remove('hidden');
+  setTimeout(() => $('task-title').focus(), 60);
+}
+
+function saveTask(){
+  const id = $('task-id').value;
+  const title = $('task-title').value.trim();
+  const est = Math.min(20, Math.max(1, parseInt($('task-est').value) || 1));
+  const date = $('task-date').value;
+
+  if (!title){ toast('Give the task a name'); return; }
+  if (!date){ toast('Pick a due date'); return; }
+
+  if (id){
+    const t = appData.tasks.find(x => x.id === +id);
+    if (t) Object.assign(t, { title, est, date });
+  } else {
+    appData.tasks.push({ id: uid(), title, est, act:0, date, done:false, log:{} });
+  }
+  saveData(); renderTasks(); renderCalendar(); renderAnalytics();
+  $('modal-task').classList.add('hidden');
+  toast(id ? 'Task updated' : 'Task added');
+}
+
+/* ═══════════════════════════════════════════════════════
+   FOCUS
+   ═══════════════════════════════════════════════════════ */
+function setFocusTask(id){
+  const t = appData.tasks.find(x => x.id === id);
+  if (!t) return;
+  activeFocus = id;
+  timer.taskId = id;
+  saveTimer();
+  renderFocusBanner(); renderTasks(); renderPomoExtras();
+  switchTab('pomo');
+  toast(`Focusing: ${t.title}`);
+}
+function clearFocus(){
+  activeFocus = null;
+  timer.taskId = null;
+  saveTimer();
+  renderFocusBanner(); renderTasks(); renderPomoExtras();
+}
+function renderFocusBanner(){
+  const t = appData.tasks.find(x => x.id === activeFocus);
+  const banner = $('focus-banner');
+  if (t){
+    $('focus-title').textContent = t.title;
+    banner.classList.remove('hidden');
+    banner.style.display = 'flex';
+  } else {
+    banner.classList.add('hidden');
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   TIMER
+   ═══════════════════════════════════════════════════════ */
+function setMode(mode, announce = true){
+  timer.mode = mode;
+  timer.running = false;
+  timer.endAt = null;
+  timer.total = MODES[mode].seconds;
+  timer.remaining = timer.total;
+  saveTimer(); renderTimer(); renderPomoExtras();
+  if (announce) toast(`${MODES[mode].label} · ${Math.round(timer.total/60)} min`);
+}
+
+function toggleTimer(){
+  if (timer.running){
+    timer.remaining = Math.max(0, Math.round((timer.endAt - Date.now())/1000));
+    timer.running = false; timer.endAt = null;
+  } else {
+    if (timer.remaining <= 0) timer.remaining = timer.total;
+    timer.running = true;
+    timer.endAt = Date.now() + timer.remaining * 1000;
+  }
+  saveTimer(); renderTimer(); renderPomoExtras();
+}
+
+function resetTimer(){
+  timer.running = false;
+  timer.endAt = null;
+  timer.total = MODES[timer.mode].seconds;
+  timer.remaining = timer.total;
+  saveTimer(); renderTimer(); renderPomoExtras();
+}
+
+function skipSession(){
+  timer.running = false; timer.endAt = null; timer.remaining = 0;
+  completeSession(true);
+}
+
+function tick(){
+  if (!timer.running) return;
+  const rem = Math.max(0, Math.round((timer.endAt - Date.now())/1000));
+  if (rem !== timer.remaining){ timer.remaining = rem; renderTimer(); }
+  if (rem <= 0) completeSession(false);
+}
+
+function completeSession(skipped){
+  const finished = timer.mode;
+  timer.running = false;
+  timer.endAt = null;
+
+  if (finished === 'pomo' && !skipped){
+    const d = today();
+    appData.pomoLog[d] = (appData.pomoLog[d] || 0) + 1;
+    appData.energy = (appData.energy || 0) + 10;
+
+    if (timer.taskId){
+      const t = appData.tasks.find(x => x.id === timer.taskId);
+      if (t){
+        t.act = (t.act || 0) + 1;
+        t.log = t.log || {};
+        t.log[d] = (t.log[d] || 0) + 1;
+      }
+    }
+    saveData();
+    renderTasks(); renderEnergy(); renderAnalytics(); renderCalendar(); renderFocusBanner();
+    beep();
+    toast('🍅 Session complete — +10 energy');
+    const count = appData.pomoLog[d] || 0;
+    setMode(count % 4 === 0 ? 'long' : 'short', false);
+  } else if (finished !== 'pomo' && !skipped){
+    beep();
+    toast('Break over — ready to focus?');
+    setMode('pomo', false);
+  } else {
+    setMode('pomo', false);
+  }
+  renderTimer(); renderPomoExtras(); saveTimer();
+}
+
+function renderTimer(){
+  const m = Math.floor(timer.remaining / 60), s = timer.remaining % 60;
+  $('timer-display').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  $('timer-label').textContent = MODES[timer.mode].label;
+
+  const pct = timer.total > 0 ? timer.remaining / timer.total : 0;
+  $('ring').style.strokeDashoffset = String(RING_C * (1 - pct));
+  $('ring').style.stroke = MODES[timer.mode].stroke;
+
+  $('timer-toggle').innerHTML = timer.running
+    ? '<i class="fa-solid fa-pause" style="font-size:11px"></i> Pause'
+    : '<i class="fa-solid fa-play" style="font-size:11px"></i> Start';
+
+  document.querySelectorAll('.mode-btn').forEach(b => {
+    const on = b.dataset.mode === timer.mode;
+    b.style.background = on ? 'var(--surface)' : 'transparent';
+    b.style.color = on ? 'var(--text)' : 'var(--text-2)';
+    b.style.boxShadow = on ? '0 1px 2px rgba(15,15,15,.1)' : 'none';
+  });
+
+  document.title = timer.running
+    ? `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')} · ${MODES[timer.mode].label}`
+    : 'Focus To-Do';
+}
+
+function renderPomoExtras(){
+  const t = appData.tasks.find(x => x.id === activeFocus);
+  const chip = $('pomo-chip');
+  if (t){
+    $('pomo-task-name').textContent = `${t.title} · ${t.act}/${t.est}`;
+    chip.style.background = 'var(--primary-soft)';
+    chip.style.color = 'var(--primary)';
+  } else {
+    $('pomo-task-name').textContent = 'No task selected';
+    chip.style.background = 'var(--surface-2)';
+    chip.style.color = 'var(--text-2)';
+  }
+  const d = today();
+  const count = appData.pomoLog[d] || 0;
+  $('pomo-count').textContent = count;
+  $('pomo-mins').textContent = count * 25;
+  $('timer-round').textContent = count > 0 ? `Round ${(count % 4) + 1} of 4` : '';
+}
+
+function renderEnergy(){
+  $('energy-val').textContent = appData.energy || 0;
+}
+
+/* ═══════════════════════════════════════════════════════
+   ANALYTICS
+   ═══════════════════════════════════════════════════════ */
+function renderAnalytics(){
+  const n = anaRange === 'week' ? 7 : 30;
+  const days = lastN(n);
+  const daySet = new Set(days);
+
+  document.querySelectorAll('.range-btn').forEach(b => {
+    const on = b.dataset.range === anaRange;
+    b.style.background = on ? 'var(--surface)' : 'transparent';
+    b.style.color = on ? 'var(--text)' : 'var(--text-2)';
+    b.style.boxShadow = on ? '0 1px 2px rgba(15,15,15,.1)' : 'none';
+  });
+
+  let pomos = 0;
+  days.forEach(d => { pomos += appData.pomoLog[d] || 0; });
+  $('ana-time').textContent = fmtDur(pomos * 25);
+  $('ana-pomos').textContent = `${pomos} pomodoro${pomos === 1 ? '' : 's'}`;
+
+  const inRange = appData.tasks.filter(t => daySet.has(t.date));
+  const doneCount = inRange.filter(t => t.done).length;
+  const pct = inRange.length ? Math.round(doneCount / inRange.length * 100) : 0;
+  $('ana-tasks').textContent = `${pct}%`;
+  $('ana-ratio').textContent = `${doneCount} of ${inRange.length} tasks`;
+
+  const expInRange = appData.expenses.filter(e => daySet.has(e.date));
+  const expTotal = expInRange.reduce((a,e) => a + e.amount, 0);
+  $('ana-exp').textContent = `$${expTotal.toFixed(2)}`;
+
+  let pts = 0, creds = 0;
+  appData.courses.forEach(c => { pts += c.gpt || 0; creds += c.credits || 0; });
+  $('ana-cgpa').textContent = creds > 0 ? (pts / creds).toFixed(2) : '0.00';
+
+  const values = days.map(d => appData.pomoLog[d] || 0);
+  const max = Math.max(...values, 1);
+  const step = n <= 7 ? 1 : 5;
+
+  $('chart-focus').innerHTML = days.map((d,i) => {
+    const v = values[i];
+    const h = v > 0 ? Math.max(6, (v/max)*100) : 2;
+    const dt = parseDate(d);
+    const show = n <= 7 || i % step === 0 || i === days.length - 1;
+    const lbl = n <= 7 ? ['S','M','T','W','T','F','S'][dt.getDay()] : (show ? String(dt.getDate()) : '');
+    return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;min-width:0">
+      <div style="width:100%;border-radius:2px 2px 0 0;
+        background:${v > 0 ? 'var(--primary)' : 'var(--surface-3)'};
+        height:${h}%;min-height:2px"></div>
+      <span style="font-size:9.5px;margin-top:6px;font-weight:600;color:var(--text-3)">${lbl}</span>
+    </div>`;
+  }).join('');
+
+  const totals = {};
+  Object.keys(EXP_CATS).forEach(c => totals[c] = 0);
+  expInRange.forEach(e => { totals[e.category] = (totals[e.category] || 0) + e.amount; });
+
+  const rows = Object.keys(EXP_CATS)
+    .map(cat => ({ cat, amt: totals[cat] }))
+    .filter(r => r.amt > 0)
+    .sort((a,b) => b.amt - a.amt);
+
+  $('chart-exp').innerHTML = rows.length
+    ? rows.map(r => {
+        const c = EXP_CATS[r.cat];
+        const p = expTotal > 0 ? (r.amt / expTotal * 100) : 0;
+        return `<div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:12.5px">
+            <span style="display:flex;align-items:center;gap:8px;font-weight:600">
+              <span style="font-size:14px">${c.emoji}</span>${r.cat}
+            </span>
+            <span class="dim tabular" style="font-weight:600">$${r.amt.toFixed(2)} · ${Math.round(p)}%</span>
+          </div>
+          <div style="width:100%;height:6px;border-radius:3px;background:var(--surface-2);overflow:hidden">
+            <div style="height:100%;width:${p}%;background:${c.color};border-radius:3px"></div>
+          </div>
+        </div>`;
+      }).join('')
+    : `<p class="dim" style="font-size:12px;text-align:center;padding:16px 0">No expenses in this range.</p>`;
+}
+
+/* ═══════════════════════════════════════════════════════
+   EXPENSES
+   ═══════════════════════════════════════════════════════ */
+function openExpenseModal(id = null){
+  const editing = id !== null;
+  $('exp-title-modal').textContent = editing ? 'Edit Expense' : 'Log Expense';
+  $('exp-id').value = editing ? id : '';
+  const e = editing ? appData.expenses.find(x => x.id === id) : null;
+  $('exp-name').value = e ? e.title : '';
+  $('exp-amount').value = e ? e.amount : '';
+  $('exp-category').value = e ? e.category : 'Food';
+  $('exp-date').value = e ? e.date : today();
+  $('modal-expense').classList.remove('hidden');
+  setTimeout(() => $('exp-name').focus(), 60);
+}
+
+function saveExpense(){
+  const id = $('exp-id').value;
+  const title = $('exp-name').value.trim();
+  const amount = parseFloat($('exp-amount').value);
+  const category = $('exp-category').value;
+  const date = $('exp-date').value;
+
+  if (!title){ toast('Add a description'); return; }
+  if (!Number.isFinite(amount) || amount <= 0){ toast('Enter a valid amount'); return; }
+  if (!date){ toast('Pick a date'); return; }
+
+  if (id){
+    const e = appData.expenses.find(x => x.id === +id);
+    if (e) Object.assign(e, { title, amount, category, date });
+  } else {
+    appData.expenses.push({ id: uid(), title, amount, category, date });
+  }
+  saveData(); renderExpenses(); renderAnalytics();
+  $('modal-expense').classList.add('hidden');
+  toast(id ? 'Expense updated' : 'Expense logged');
+}
+
+function renderExpenses(){
+  const now = new Date(); now.setHours(0,0,0,0);
+  const d = today();
+
+  document.querySelectorAll('.exp-filter').forEach(b => {
+    const on = b.dataset.filter === expFilter;
+    b.style.background = on ? 'var(--surface)' : 'transparent';
+    b.style.color = on ? 'var(--text)' : 'var(--text-2)';
+    b.style.boxShadow = on ? '0 1px 2px rgba(15,15,15,.1)' : 'none';
+  });
+
+  if (expFilter === 'weekly'){
+    $('exp-title').textContent = 'Last 7 days';
+    const start = daysAgo(6);
+    const end = new Date(); end.setHours(23,59,59,999);
+    const weekly = appData.expenses.filter(e => {
+      const dt = parseDate(e.date);
+      return dt >= start && dt <= end;
+    });
+    const total = weekly.reduce((a,e) => a + e.amount, 0);
+    $('exp-total').textContent = `$${total.toFixed(2)}`;
+    $('exp-label').textContent = 'Spent in the last 7 days';
+
+    const buckets = lastN(7).map(dd => ({
+      date: dd,
+      cats: Object.fromEntries(Object.keys(EXP_CATS).map(k => [k, 0])),
+      total: 0
+    }));
+    const byDate = Object.fromEntries(buckets.map(b => [b.date, b]));
+    weekly.forEach(e => {
+      const b = byDate[e.date];
+      if (!b) return;
+      b.cats[e.category] = (b.cats[e.category] || 0) + e.amount;
+      b.total += e.amount;
+    });
+    const maxVal = Math.max(...buckets.map(b => b.total), 1);
+    const dayLetters = ['S','M','T','W','T','F','S'];
+
+    $('exp-list').innerHTML = `
+      <div class="card" style="padding:16px">
+        <h4 style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:12px">Daily breakdown</h4>
+        <div style="display:flex;align-items:flex-end;gap:8px;height:176px;padding-top:16px">
+          ${buckets.map(b => {
+            const h = b.total > 0 ? Math.max((b.total/maxVal)*100, 8) : 3;
+            const dt = parseDate(b.date);
+            return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">
+              <div style="width:100%;display:flex;flex-direction:column;justify-content:flex-end;
+                border-radius:4px 4px 0 0;overflow:hidden;height:${h}%;background:var(--surface-2)">
+                ${Object.keys(EXP_CATS).map(cat => {
+                  const amt = b.cats[cat];
+                  if (!amt) return '';
+                  const seg = (amt / b.total) * 100;
+                  return `<div style="height:${seg}%;background:${EXP_CATS[cat].color}" title="${cat}: $${amt.toFixed(2)}"></div>`;
+                }).join('')}
+              </div>
+              <span style="font-size:10.5px;margin-top:8px;font-weight:600;color:var(--text-2)">${dayLetters[dt.getDay()]}</span>
+              <span style="font-size:9px;color:var(--text-3)">${dt.getDate()}</span>
+            </div>`;
+          }).join('')}
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px 12px;padding-top:12px;margin-top:12px;
+          border-top:1px solid var(--border);justify-content:center">
+          ${Object.keys(EXP_CATS).map(cat => `
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--text-2)">
+              <span style="font-size:13px">${EXP_CATS[cat].emoji}</span>${cat}
+            </div>`).join('')}
+        </div>
+      </div>`;
+    return;
+  }
+
+  if (expFilter === 'monthly'){
+    $('exp-title').textContent = 'Month by month';
+    const monthTotals = {};
+    appData.expenses.forEach(e => {
+      const dt = parseDate(e.date);
+      const key = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}`;
+      monthTotals[key] = (monthTotals[key] || 0) + e.amount;
+    });
+    const nowKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+    $('exp-total').textContent = `$${(monthTotals[nowKey] || 0).toFixed(2)}`;
+    $('exp-label').textContent = now.toLocaleString('default', { month:'long', year:'numeric' });
+
+    const keys = Object.keys(monthTotals).sort().reverse();
+    const maxV = Math.max(...Object.values(monthTotals), 1);
+
+    $('exp-list').innerHTML = keys.length ? `
+      <div class="card" style="padding:16px">
+        <h4 style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:14px">Monthly totals</h4>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          ${keys.map(k => {
+            const [y,m] = k.split('-');
+            const label = new Date(+y, +m-1, 1).toLocaleString('default', { month:'long', year:'numeric' });
+            const amt = monthTotals[k];
+            const p = Math.max((amt / maxV) * 100, 4);
+            return `<div>
+              <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:6px">
+                <span style="font-weight:600">${label}</span>
+                <span class="tabular" style="font-weight:700">$${amt.toFixed(2)}</span>
+              </div>
+              <div style="width:100%;height:6px;border-radius:3px;background:var(--surface-2);overflow:hidden">
+                <div style="height:100%;width:${p}%;background:var(--primary);border-radius:3px"></div>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>` : emptyState('🧾','No expenses yet','Log one to see monthly totals.');
+    return;
+  }
+
+  const isAll = expFilter === 'all';
+  $('exp-title').textContent = isAll ? 'All expenses' : "Today's expenses";
+
+  const filtered = appData.expenses
+    .filter(e => isAll || e.date === d)
+    .sort((a,b) => b.date.localeCompare(a.date) || b.id - a.id);
+
+  const total = filtered.reduce((a,e) => a + e.amount, 0);
+  $('exp-total').textContent = `$${total.toFixed(2)}`;
+  $('exp-label').textContent = isAll ? 'Total across all time' : 'Spent today';
+
+  $('exp-list').innerHTML = filtered.length ? filtered.map(e => {
+    const c = EXP_CATS[e.category] || EXP_CATS.Other;
+    return `
+      <div class="card" style="padding:12px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <div style="display:flex;align-items:center;gap:12px;min-width:0">
+          <span style="font-size:18px">${c.emoji}</span>
+          <div style="min-width:0">
+            <p style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(e.title)}</p>
+            <p class="dim" style="font-size:11px">${e.category} · ${e.date}</p>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+          <span class="tabular" style="font-size:13px;font-weight:700;margin-right:4px">$${e.amount.toFixed(2)}</span>
+          <button data-exp-edit="${e.id}" style="width:28px;height:28px;border-radius:4px;color:var(--text-2)">
+            <i class="fa-solid fa-pen" style="font-size:10px"></i></button>
+          <button data-exp-del="${e.id}" style="width:28px;height:28px;border-radius:4px;color:var(--text-2)">
+            <i class="fa-regular fa-trash-can" style="font-size:10px"></i></button>
+        </div>
+      </div>`;
+  }).join('') : emptyState('🧾','No expenses logged','Tap "Log" to record one.');
+}
+
+/* ═══════════════════════════════════════════════════════
+   GPA
+   ═══════════════════════════════════════════════════════ */
+function gradeFor(total, final){
+  if (final < 20) return { letter:'F', vlg:0, status:'Fail — final exam below 40%' };
+  if (total >= 90) return { letter:'A+', vlg:4.0,  status:'Excellent' };
+  if (total >= 85) return { letter:'A',  vlg:4.0,  status:'Excellent' };
+  if (total >= 80) return { letter:'A-', vlg:3.75, status:'Excellent' };
+  if (total >= 75) return { letter:'B+', vlg:3.5,  status:'Very Good' };
+  if (total >= 70) return { letter:'B',  vlg:3.0,  status:'Very Good' };
+  if (total >= 65) return { letter:'B-', vlg:2.75, status:'Good' };
+  if (total >= 60) return { letter:'C+', vlg:2.5,  status:'Good' };
+  if (total >= 50) return { letter:'C',  vlg:2.0,  status:'Satisfactory' };
+  if (total >= 45) return { letter:'C-', vlg:1.75, status:'Unsatisfactory' };
+  if (total >= 40) return { letter:'D',  vlg:1.0,  status:'Very Poor' };
+  return { letter:'F', vlg:0, status:'Fail' };
+}
+
+function saveCourse(){
+  const title = $('gpa-name').value.trim();
+  if (!title){ toast('Enter a course name'); return; }
+  const clamp = (id, min, max, fb) => {
+    let v = parseFloat($(id).value);
+    if (!Number.isFinite(v)) v = fb;
+    v = Math.min(max, Math.max(min, v));
+    $(id).value = v;
+    return v;
+  };
+  const credits = clamp('gpa-credits', 1, 10, 3);
+  const cont = clamp('gpa-cont', 0, 50, 0);
+  const final = clamp('gpa-final', 0, 50, 0);
+  const total = cont + final;
+  const g = gradeFor(total, final);
+
+  appData.courses.push({
+    id: uid(), title, credits, continuous: cont, finalExam: final, totalMark: total,
+    letter: g.letter, vlg: g.vlg, status: g.status, gpt: g.vlg * credits
+  });
+  saveData(); renderGPA(); renderAnalytics();
+  $('modal-gpa').classList.add('hidden');
+  $('gpa-name').value = '';
+  toast(`Saved · ${g.letter} (${g.vlg.toFixed(2)})`);
+}
+
+function renderGPA(){
+  const list = $('courses-list');
+  if (!appData.courses.length){
+    list.innerHTML = emptyState('🎓','No courses yet','Add one to start tracking your CGPA.');
+    $('cgpa').textContent = '0.00';
+    $('cgpa-meta').textContent = '0 credit hours';
+    return;
+  }
+  let pts = 0, creds = 0;
+  list.innerHTML = appData.courses.map(c => {
+    pts += c.gpt; creds += c.credits;
+    const failing = c.letter === 'F';
+    return `
+      <div class="card" style="padding:14px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <div style="min-width:0">
+          <p style="font-size:13.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.title)}</p>
+          <p class="dim tabular" style="font-size:11.5px;margin-top:2px">
+            ${c.credits} cr · ${c.continuous}/50 + ${c.finalExam}/50 = <b style="color:var(--text)">${c.totalMark}%</b>
+          </p>
+          <p style="font-size:11.5px;margin-top:2px;font-weight:600;color:${failing ? 'var(--danger)' : 'var(--primary)'}">${c.status}</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+          <div style="text-align:right">
+            <p style="font-size:16px;font-weight:800;color:var(--primary)">${c.letter}</p>
+            <p class="dim tabular" style="font-size:10.5px">${c.vlg.toFixed(2)}</p>
+          </div>
+          <button data-course-del="${c.id}" style="width:28px;height:28px;border-radius:4px;color:var(--text-2)">
+            <i class="fa-regular fa-trash-can" style="font-size:10px"></i></button>
+        </div>
+      </div>`;
+  }).join('');
+  $('cgpa').textContent = creds > 0 ? (pts / creds).toFixed(2) : '0.00';
+  $('cgpa-meta').textContent = `${creds} credit hours · ${appData.courses.length} courses`;
+}
+
+/* ═══════════════════════════════════════════════════════
+   CALENDAR
+   ═══════════════════════════════════════════════════════ */
+function renderCalLegend(){
+  $('cal-legend').innerHTML = Object.entries(EVENT_CATS).map(([n, c]) =>
+    `<span style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--text-2)">
+      <span style="font-size:13px">${c.emoji}</span>${n}
+    </span>`).join('');
+}
+
+function renderCalendar(){
+  const y = calCursor.getFullYear(), m = calCursor.getMonth();
+  $('cal-title').textContent = calCursor.toLocaleString('default', { month:'long', year:'numeric' });
+
+  const firstDow = new Date(y, m, 1).getDay();
+  const lead = firstDow === 0 ? 6 : firstDow - 1;
+  const totalDays = new Date(y, m+1, 0).getDate();
+  const t = today();
+
+  let html = '';
+  for (let i=0;i<lead;i++) html += `<div style="height:52px"></div>`;
+
+  for (let d=1; d<=totalDays; d++){
+    const dStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const tasks = appData.tasks.filter(x => x.date === dStr);
+    const events = appData.events.filter(x => x.date === dStr);
+    const total = tasks.length + events.length;
+    const isToday = dStr === t;
+    const isSel = dStr === calSelected;
+
+    const ev = events[0];
+    const chipHtml = ev
+      ? (() => { const c = EVENT_CATS[ev.category] || EVENT_CATS.Other;
+          return `<p style="font-size:9px;padding:1px 4px;border-radius:3px;overflow:hidden;
+            text-overflow:ellipsis;white-space:nowrap;font-weight:600;
+            background:${c.color}1a;color:${c.color}">${esc(ev.title)}</p>`; })()
+      : tasks[0]
+        ? `<p style="font-size:9px;padding:1px 4px;border-radius:3px;overflow:hidden;
+           text-overflow:ellipsis;white-space:nowrap;font-weight:600;
+           background:var(--surface-3);color:var(--text-2)">${esc(tasks[0].title)}</p>`
+        : '';
+
+    html += `
+      <button data-cal="${dStr}"
+        style="height:52px;border-radius:4px;padding:4px;display:flex;flex-direction:column;
+        justify-content:space-between;text-align:left;
+        background:${isSel ? 'var(--primary-soft)' : 'transparent'};
+        border:1px solid ${isSel ? 'var(--primary)' : isToday ? 'var(--primary)' : 'var(--border)'};
+        border-left-width:${isToday && !isSel ? '3px' : '1px'}">
+        <div class="row" style="width:100%">
+          <span class="tabular" style="font-size:11px;font-weight:${isToday?'700':'600'};
+            color:${isToday ? 'var(--primary)' : 'var(--text)'}">${d}</span>
+          ${total > 0 ? `<span style="width:4px;height:4px;border-radius:50%;
+            background:${isSel ? 'var(--primary)' : 'var(--text-3)'}"></span>` : ''}
+        </div>
+        <div style="width:100%;overflow:hidden">
+          ${chipHtml}
+          ${total > 1 ? `<p class="tabular" style="font-size:8.5px;padding-left:2px;color:var(--text-3)">+${total-1}</p>` : ''}
+        </div>
+      </button>`;
+  }
+  $('cal-grid').innerHTML = html;
+  renderAgenda();
+}
+
+function renderAgenda(){
+  const d = calSelected;
+  const tasks = appData.tasks.filter(t => t.date === d);
+  const events = appData.events.filter(e => e.date === d).sort((a,b) => a.id - b.id);
+  const count = tasks.length + events.length;
+
+  $('agenda-title').textContent = parseDate(d).toLocaleDateString(undefined, {
+    weekday:'long', month:'short', day:'numeric'
+  });
+  $('agenda-badge').textContent = `${count} item${count === 1 ? '' : 's'}`;
+
+  if (!count){
+    $('agenda').innerHTML = `<p class="dim" style="font-size:12px;text-align:center;padding:16px 0">Nothing scheduled.</p>`;
+    return;
+  }
+
+  let html = '';
+  if (events.length){
+    html += `<p style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:6px">Events</p>`;
+    html += events.map(ev => {
+      const c = EVENT_CATS[ev.category] || EVENT_CATS.Other;
+      const linked = ev.linkedTaskId ? appData.tasks.find(t => t.id === ev.linkedTaskId) : null;
+      const isActive = linked && activeFocus === linked.id;
+      return `
+        <div class="soft" style="padding:10px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <div style="display:flex;align-items:center;gap:10px;min-width:0">
+            <span style="width:24px;height:24px;border-radius:4px;display:flex;align-items:center;
+              justify-content:center;flex-shrink:0;font-size:14px;
+              background:${c.color}1a">${c.emoji}</span>
+            <div style="min-width:0">
+              <p style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(ev.title)}</p>
+              <div style="display:flex;align-items:center;gap:6px;margin-top:2px;flex-wrap:wrap">
+                ${catChip(ev.category)}
+                ${linked ? `<span class="dim tabular" style="font-size:11px">🍅 ${linked.act}/${linked.est} · linked</span>` : ''}
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:2px;flex-shrink:0">
+            ${linked ? `<button data-focus="${linked.id}" class="${isActive ? 'btn btn-primary' : 'btn btn-ghost'}"
+              style="padding:4px 10px;font-size:11.5px">Focus</button>` : ''}
+            <button data-event-edit="${ev.id}" style="width:28px;height:28px;border-radius:4px;color:var(--text-2)">
+              <i class="fa-solid fa-pen" style="font-size:10px"></i></button>
+            <button data-event-del="${ev.id}" style="width:28px;height:28px;border-radius:4px;color:var(--text-2)">
+              <i class="fa-regular fa-trash-can" style="font-size:10px"></i></button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+  if (tasks.length){
+    html += `<p style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin:${events.length ? '12px' : '0'} 0 6px">Tasks</p>`;
+    html += tasks.map(t => `
+      <div class="soft" style="padding:10px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <div style="display:flex;align-items:center;gap:10px;min-width:0">
+          <span class="tomato ${t.done ? 'on' : ''}"></span>
+          <span style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+            ${t.done ? 'text-decoration:line-through;color:var(--text-2)' : ''}">${esc(t.title)}</span>
+          ${t.cat ? catChip(t.cat) : ''}
+        </div>
+        <button data-focus="${t.id}" class="btn btn-ghost" style="padding:4px 10px;font-size:11.5px;flex-shrink:0">Focus</button>
+      </div>`).join('');
+  }
+  $('agenda').innerHTML = html;
+}
+
+document.addEventListener('click', e => {
+  const cal = e.target.closest('[data-cal]');
+  if (cal){ calSelected = cal.dataset.cal; renderCalendar(); return; }
+});
+
+/* ═══════════════════════════════════════════════════════
+   EVENT MODAL
+   ═══════════════════════════════════════════════════════ */
+function renderEventCats(){
+  $('event-cats').innerHTML = Object.entries(EVENT_CATS).map(([n, c]) =>
+    `<button type="button" class="cat-btn ${n === eventDraftCat ? 'on' : ''}"
+      data-cat="${n}" style="--c:${c.color};--c-soft:${c.color}1a">
+      <span style="font-size:18px;line-height:1">${c.emoji}</span>
+      <span>${n}</span>
+    </button>`).join('');
+
+  const links = POMO_CATS.includes(eventDraftCat);
+  $('event-study').classList.toggle('hidden', !links);
+  if (links) $('event-study').style.display = 'block';
+  $('event-est-wrap').style.display = ($('event-link').checked && links) ? 'block' : 'none';
+}
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-cat]');
+  if (!b) return;
+  eventDraftCat = b.dataset.cat;
+  renderEventCats();
+});
+
+function openEventModal(id = null){
+  const editing = id !== null;
+  const ev = editing ? appData.events.find(x => x.id === id) : null;
+
+  $('event-title-modal').textContent = editing ? 'Edit Event' : 'New Event';
+  $('event-id').value = editing ? id : '';
+  $('event-name').value = ev ? ev.title : '';
+  $('event-date').value = ev ? ev.date : calSelected;
+  $('event-est').value = (ev && ev.est) ? ev.est : 2;
+  $('event-link').checked = ev ? !!ev.linkedTaskId : true;
+  eventDraftCat = ev ? ev.category : 'Study';
+
+  renderEventCats();
+  $('modal-event').classList.remove('hidden');
+  setTimeout(() => $('event-name').focus(), 60);
+}
+
+function saveEvent(){
+  const id = $('event-id').value;
+  const title = $('event-name').value.trim();
+  const date = $('event-date').value;
+  const cat = eventDraftCat;
+  const canLink = POMO_CATS.includes(cat);
+  const wantsLink = canLink && $('event-link').checked;
+  const est = Math.min(20, Math.max(1, parseInt($('event-est').value) || 1));
+
+  if (!title){ toast('Give the event a name'); return; }
+  if (!date){ toast('Pick a date'); return; }
+
+  if (id){
+    const ev = appData.events.find(x => x.id === +id);
+    if (!ev) return;
+    ev.title = title; ev.date = date; ev.category = cat;
+
+    const linked = ev.linkedTaskId ? appData.tasks.find(t => t.id === ev.linkedTaskId) : null;
+    if (wantsLink){
+      if (linked){
+        Object.assign(linked, { title, date, est, cat });
+      } else {
+        const task = { id: uid(), title, est, act:0, date, done:false, log:{}, eventId: ev.id, cat };
+        appData.tasks.push(task);
+        ev.linkedTaskId = task.id;
+      }
+      ev.est = est;
+    } else if (linked){
+      if (activeFocus === linked.id) clearFocus();
+      appData.tasks = appData.tasks.filter(t => t.id !== linked.id);
+      ev.linkedTaskId = null;
+      ev.est = null;
+    }
+  } else {
+    const evId = uid();
+    const ev = { id: evId, title, date, category: cat, linkedTaskId: null, est: null };
+    if (wantsLink){
+      const task = { id: uid(), title, est, act:0, date, done:false, log:{}, eventId: evId, cat };
+      appData.tasks.push(task);
+      ev.linkedTaskId = task.id;
+      ev.est = est;
+    }
+    appData.events.push(ev);
+  }
+
+  saveData(); renderTasks(); renderCalendar(); renderAnalytics();
+  $('modal-event').classList.add('hidden');
+  toast(id ? 'Event updated' : (wantsLink ? 'Study event linked to Pomodoro' : 'Event added'));
+}
+
+/* ═══════════════════════════════════════════════════════
+   IMPORT / EXPORT
+   ═══════════════════════════════════════════════════════ */
+function exportData(){
+  const blob = new Blob([JSON.stringify(appData, null, 2)], { type:'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `focus-todo-${today()}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  toast('Backup downloaded');
+}
+
+function importData(file){
+  const reader = new FileReader();
+  reader.onload = async () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if (!data || typeof data !== 'object') throw new Error('bad shape');
+      if (!await confirmDialog('Importing replaces all current data. Continue?')) return;
+      appData = Object.assign({
+        tasks:[], expenses:[], courses:[], events:[], pomoLog:{}, energy:0,
+        page:{ icon: DEFAULT_ICON, cover: null }
+      }, data);
+      ['tasks','expenses','courses','events'].forEach(k => {
+        if (!Array.isArray(appData[k])) appData[k] = [];
+      });
+      if (!appData.pomoLog || typeof appData.pomoLog !== 'object') appData.pomoLog = {};
+      if (!appData.page) appData.page = { icon: DEFAULT_ICON, cover: null };
+      appData.events.forEach(ev => {
+        if (!ev.category || !EVENT_CATS[ev.category]) ev.category = 'Other';
+      });
+      saveData();
+      renderAll();
+      toast('Backup restored');
+    } catch(err){
+      toast('That file could not be read');
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* ═══════════════════════════════════════════════════════
+   RENDER ALL
+   ═══════════════════════════════════════════════════════ */
+function renderAll(){
+  renderPageHeader();
+  renderEnergy();
+  renderTasks();
+  renderFocusBanner();
+  renderTimer();
+  renderPomoExtras();
+  renderExpenses();
+  renderGPA();
+  renderCalLegend();
+  renderCalendar();
+  renderAnalytics();
+}
+
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════ */
+function applyResponsive(){
+  const isDesktop = window.innerWidth >= 768;
+  const sidebar = $('sidebar');
+  const bottomNav = document.querySelector('nav');
+  const menuBtn = $('btn-menu');
+
+  if (isDesktop){
+    sidebar.style.position = 'relative';
+    sidebar.style.transform = 'translateX(0)';
+    if (bottomNav) bottomNav.style.display = 'none';
+    if (menuBtn) menuBtn.style.display = 'none';
+  } else {
+    sidebar.style.position = 'fixed';
+    sidebar.style.transform = 'translateX(-100%)';
+    if (bottomNav) bottomNav.style.display = 'flex';
+    if (menuBtn) menuBtn.style.display = 'flex';
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   WIRING
+   ═══════════════════════════════════════════════════════ */
+function bind(){
+  $('btn-menu').addEventListener('click', openSidebar);
+  $('scrim').addEventListener('click', closeSidebar);
+
+  document.querySelectorAll('.nav').forEach(el =>
+    el.addEventListener('click', () => switchTab(el.dataset.tab)));
+
+  $('btn-theme').addEventListener('click', () =>
+    applyTheme(!document.documentElement.classList.contains('dark')));
+
+  document.querySelectorAll('.open-task').forEach(b =>
+    b.addEventListener('click', () => openTaskModal()));
+  $('save-task').addEventListener('click', saveTask);
+
+  $('btn-open-expense').addEventListener('click', () => openExpenseModal());
+  $('save-expense').addEventListener('click', saveExpense);
+
+  $('open-gpa').addEventListener('click', () => $('modal-gpa').classList.remove('hidden'));
+  $('save-gpa').addEventListener('click', saveCourse);
+  $('gpa-quick').addEventListener('change', e => {
+    const val = e.target.value;
+    if (!val) return;
+    const [title, credits] = val.split('|');
+    $('gpa-name').value = title;
+    $('gpa-credits').value = credits;
+  });
+
+  $('open-event').addEventListener('click', () => openEventModal());
+  $('save-event').addEventListener('click', saveEvent);
+  $('event-link').addEventListener('change', renderEventCats);
+
+  $('cal-prev').addEventListener('click', () => {
+    calCursor.setMonth(calCursor.getMonth() - 1);
+    renderCalendar();
+  });
+  $('cal-next').addEventListener('click', () => {
+    calCursor.setMonth(calCursor.getMonth() + 1);
+    renderCalendar();
+  });
+
+  document.querySelectorAll('.mode-btn').forEach(b =>
+    b.addEventListener('click', () => setMode(b.dataset.mode)));
+  $('timer-toggle').addEventListener('click', toggleTimer);
+  $('timer-reset').addEventListener('click', resetTimer);
+  $('timer-skip').addEventListener('click', skipSession);
+  $('pomo-chip').addEventListener('click', () => switchTab('today'));
+
+  document.querySelectorAll('.range-btn').forEach(b =>
+    b.addEventListener('click', () => {
+      anaRange = b.dataset.range;
+      renderAnalytics();
+    }));
+
+  document.querySelectorAll('.exp-filter').forEach(b =>
+    b.addEventListener('click', () => {
+      expFilter = b.dataset.filter;
+      renderExpenses();
+    }));
+
+  $('page-icon').addEventListener('click', openEmojiPicker);
+  $('icon-change').addEventListener('click', openEmojiPicker);
+  $('emoji-random').addEventListener('click', () => {
+    const all = Object.values(EMOJIS).flat();
+    const pick = all[Math.floor(Math.random() * all.length)];
+    setIcon(pick);
+    $('modal-emoji').classList.add('hidden');
+    toast('Icon updated');
+  });
+  $('emoji-remove').addEventListener('click', () => {
+    setIcon(null);
+    $('modal-emoji').classList.add('hidden');
+    toast('Icon removed');
+  });
+  $('emoji-search').addEventListener('input', e => {
+    const q = e.target.value.trim();
+    if (!q){
+      renderEmojiGrid();
+      return;
+    }
+    const direct = [...q].filter(ch => /\p{Extended_Pictographic}/u.test(ch));
+    const all = [];
+    const seen = new Set();
+    Object.values(EMOJIS).forEach(list => list.forEach(em => {
+      if (!seen.has(em)){ seen.add(em); all.push(em); }
+    }));
+    const grid = $('emoji-grid');
+    const tiles = [];
+    if (direct.length){
+      tiles.push(`<button class="emoji-cell" data-emoji="${direct[0]}"
+        style="background:var(--primary-soft)">${direct[0]}</button>`);
+    }
+    tiles.push(...all.slice(0, 200).map(em =>
+      `<button class="emoji-cell" data-emoji="${em}">${em}</button>`));
+    grid.innerHTML = tiles.join('');
+  });
+
+  document.addEventListener('click', e => {
+    const tab = e.target.closest('[data-emoji-tab]');
+    if (tab){
+      emojiTab = tab.dataset.emojiTab;
+      $('emoji-search').value = '';
+      renderEmojiTabs();
+      renderEmojiGrid();
+      return;
+    }
+    const cell = e.target.closest('[data-emoji]');
+    if (cell){
+      setIcon(cell.dataset.emoji);
+      $('modal-emoji').classList.add('hidden');
+      toast('Icon updated');
+      return;
+    }
+  });
+
+  $('cover-add').addEventListener('click', openCoverPicker);
+  $('cover-change').addEventListener('click', openCoverPicker);
+  $('cover-remove').addEventListener('click', () => {
+    setCover(null);
+    toast('Cover removed');
+  });
+
+  document.addEventListener('click', e => {
+    const cell = e.target.closest('[data-cover]');
+    if (cell){
+      setCover(cell.dataset.cover);
+      $('modal-cover').classList.add('hidden');
+      toast('Cover updated');
+      return;
+    }
+  });
+
+  $('cover-url-set').addEventListener('click', () => {
+    const url = $('cover-url').value.trim();
+    if (!url){ toast('Paste an image URL first'); return; }
+    if (!/^https?:\/\//i.test(url) && !/^data:image\//i.test(url)){
+      toast('URL must start with http:// or https://');
+      return;
+    }
+    setCover(`url("${url}") center/cover no-repeat`);
+    $('modal-cover').classList.add('hidden');
+    toast('Cover updated');
+  });
+
+  $('cover-file').addEventListener('change', e => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 500 * 1024){
+      toast('Image is over 500 KB — pick a smaller one');
+      e.target.value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCover(`url("${reader.result}") center/cover no-repeat`);
+      $('modal-cover').classList.add('hidden');
+      toast('Cover updated');
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  });
+
+  $('btn-export').addEventListener('click', exportData);
+  $('btn-import').addEventListener('click', () => $('import-file').click());
+  $('import-file').addEventListener('change', e => {
+    const f = e.target.files?.[0];
+    if (f) importData(f);
+    e.target.value = '';
+  });
+
+  $('btn-reset').addEventListener('click', async () => {
+    if (!await confirmDialog('This erases everything permanently. There is no undo.')) return;
+    localStorage.removeItem(STORE);
+    localStorage.removeItem(TIMER_KEY);
+    await Native.save({
+      tasks:[], expenses:[], courses:[], events:[], pomoLog:{}, energy:0,
+      page:{ icon: DEFAULT_ICON, cover: null }
+    });
+    location.reload();
+  });
+
+  document.querySelectorAll('[data-close]').forEach(b =>
+    b.addEventListener('click', () => $(b.dataset.close).classList.add('hidden')));
+
+  document.querySelectorAll('.modal').forEach(m =>
+    m.addEventListener('click', e => { if (e.target === m) m.classList.add('hidden'); }));
+
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    if (!$('modal-confirm').classList.contains('hidden')){
+      $('confirm-cancel').click();
+      return;
+    }
+    const open = [...document.querySelectorAll('.modal')]
+      .filter(m => !m.classList.contains('hidden'));
+    if (open.length) open[open.length - 1].classList.add('hidden');
+    else if (sidebarOpen) closeSidebar();
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && timer.running) tick();
+  });
+  window.addEventListener('focus', () => { if (timer.running) tick(); });
+
+  let wasDesktop = window.innerWidth >= 768;
+  window.addEventListener('resize', () => {
+    const isDesktop = window.innerWidth >= 768;
+    if (isDesktop !== wasDesktop){
+      wasDesktop = isDesktop;
+      if (isDesktop) closeSidebar();
+      applyResponsive();
+    }
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   BOOT
+   ═══════════════════════════════════════════════════════ */
+async function init(){
+  await Native.wait();
+  const disk = await Native.load();
+  if (disk && typeof disk === 'object' && (disk.tasks || disk.expenses || disk.courses || disk.events)){
+    appData = Object.assign(appData, disk);
+    ['tasks','expenses','courses','events'].forEach(k => {
+      if (!Array.isArray(appData[k])) appData[k] = [];
+    });
+    if (!appData.pomoLog || typeof appData.pomoLog !== 'object') appData.pomoLog = {};
+    if (!appData.page) appData.page = { icon: DEFAULT_ICON, cover: null };
+    appData.events.forEach(ev => {
+      if (!ev.category || !EVENT_CATS[ev.category]) ev.category = 'Other';
+    });
+  } else {
+    loadLocal();
+  }
+
+  loadTimer();
+
+  const savedTheme = localStorage.getItem(THEME_KEY);
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  applyTheme(savedTheme ? savedTheme === 'dark' : prefersDark);
+
+  $('task-date').value = today();
+  $('exp-date').value = today();
+  $('event-date').value = today();
+
+  applyResponsive();
+  bind();
+  renderAll();
+
+  if (nativeReady){
+    try {
+      const p = await window.pywebview.api.data_dir();
+      $('data-path').textContent = p + (navigator.userAgent.includes('Windows') ? '\\data.json' : '/data.json');
+    } catch(e){
+      $('data-path').textContent = 'Not available';
+    }
+  } else {
+    $('data-path').textContent = 'Browser localStorage (running as a webpage, not a native app)';
+  }
+
+  setInterval(tick, 250);
+}
+
+window.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
